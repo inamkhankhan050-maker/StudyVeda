@@ -13,6 +13,7 @@ export default function Login() {
   const [mode, setMode] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
 
@@ -24,7 +25,7 @@ export default function Login() {
     try {
       if (mode === 'signin') { await auth.signIn(email.trim(), password); nav(from, { replace: true }); }
       else if (mode === 'signup') {
-        const r = await auth.signUp(email.trim(), password);
+        const r = await auth.signUp(email.trim(), password, name.trim());
         setMsg({ ok: true, text: r?.session ? 'Account created. You are signed in.' : 'Account created. Check your email for a confirmation link, then sign in.' });
         setMode('signin');
       } else { await auth.resetPassword(email.trim()); setMsg({ ok: true, text: 'If that email has an account, a reset link is on its way.' }); }
@@ -37,17 +38,21 @@ export default function Login() {
       <form className="card auth-card" onSubmit={submit} noValidate>
         <LogoMark size={44} />
         <h1>{mode === 'signup' ? 'Create your account' : mode === 'reset' ? 'Reset password' : 'Sign in to StudyVeda'}</h1>
-        <p className="muted small">Save your results, track progress and bookmark questions. Administrators sign in here too.</p>
-        {IS_DEMO && <div className="notice">Accounts are switched off in demo mode because no database is connected. Practice still works and results save on this device.</div>}
+        <p className="muted small">Join the discussion, save your results and bookmark questions. Administrators sign in here too.</p>
+        {IS_DEMO && <div className="notice">Demo mode: your account is saved only in this browser on this device. Shared accounts turn on once the database is connected.</div>}
+        {mode === 'signup' && (
+          <label className="field"><span>Your name</span>
+            <input className="input" type="text" autoComplete="name" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} placeholder="Shown with your comments" /></label>
+        )}
         <label className="field"><span>Email</span>
-          <input className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} disabled={IS_DEMO} /></label>
+          <input className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></label>
         {mode !== 'reset' && (
           <label className="field"><span>Password</span>
-            <input className="input" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} disabled={IS_DEMO} />
+            <input className="input" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
             {mode === 'signup' && <small className="muted">At least 8 characters.</small>}</label>
         )}
         {msg && <div className={msg.ok ? 'notice ok' : 'notice err'} role="alert">{msg.text}</div>}
-        <button className="btn btn-primary btn-block" disabled={busy || IS_DEMO || !email || (mode !== 'reset' && password.length < (mode === 'signup' ? 8 : 1))}>
+        <button className="btn btn-primary btn-block" disabled={busy || !email || (mode !== 'reset' && password.length < (mode === 'signup' ? 8 : 1))}>
           {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Sign in'}
         </button>
         <div className="auth-links small">
