@@ -11,6 +11,7 @@ import Breadcrumbs from '../components/Breadcrumbs.jsx';
 import { OptionButton } from '../components/QuestionView.jsx';
 import { Loading, ErrorState, Empty, NotFoundBlock } from '../components/States.jsx';
 import { Confirm } from '../components/Modal.jsx';
+import Discussion from '../components/Discussion.jsx';
 
 export default function Play() {
   const [params] = useSearchParams();
@@ -280,6 +281,7 @@ function Results({ data, round, mode, result, saveState, onRestart }) {
                   ))}
                 </ol>
                 {q.explanation && <div className="explain"><strong>Explanation</strong><p>{q.explanation}</p></div>}
+                <Discussion qid={q.id} />
               </article>
             );
           })}
