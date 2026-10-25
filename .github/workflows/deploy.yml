@@ -1,0 +1,52 @@
+name: Test and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Public values only. Set them in Settings → Secrets and variables → Actions → Variables.
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || format('/{0}/', github.event.repository.name) }}
+      VITE_SITE_URL: ${{ vars.VITE_SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Unit tests (scoring, validation, CSV, seed integrity)
+        run: npm test
+      - name: Database security tests (schema + RLS on PostgreSQL/PGlite)
+        run: npm run test:db
+      - name: Build static site
+        run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
