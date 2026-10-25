@@ -18,7 +18,7 @@ const catId = Object.fromEntries(categories.map((c) => [c.slug, c.id]));
 
 const subjects = D.subjects.map(([slug, name, icon], i) => ({
   id: uuid('subject:' + slug), slug, name, icon, status: 'published', sort_order: i,
-  description: `Practise ${name} multiple-choice questions with answers and clear explanations.`,
+  description: D.subjectBlurbs[slug] || `Practise ${name} multiple-choice questions with answers and clear explanations.`,
   created_at: NOW, updated_at: NOW, created_by: null, updated_by: null,
 }));
 const subjId = Object.fromEntries(subjects.map((s) => [s.slug, s.id]));
@@ -26,7 +26,7 @@ const subject_categories = D.subjects.flatMap(([slug, , , cats]) => cats.map((c)
 
 const exams = D.exams.map(([slug, name, group], i) => ({
   id: uuid('exam:' + slug), slug, name, group_name: group, status: 'published', sort_order: i,
-  description: `Practice questions in the style of ${name} papers. StudyVeda is independent and not affiliated with the conducting body.`,
+  description: D.examBlurbs[slug] || `Practice questions in the style of ${name} papers.`,
   created_at: NOW, updated_at: NOW, created_by: null, updated_by: null,
 }));
 const examId = Object.fromEntries(exams.map((e) => [e.slug, e.id]));
