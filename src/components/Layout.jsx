@@ -92,7 +92,7 @@ export function DemoBanner({ admin }) {
     <div className="demo-banner" role="note">
       <strong>Demo mode.</strong> {admin
         ? 'No database is connected, so the admin panel is open and edits are saved only in this browser. Connect Supabase to turn on secure admin login and shared storage.'
-        : 'Content and progress are stored in this browser only until the Supabase database is connected.'}
+        : 'Progress is saved only in this browser until the database is connected.'}
     </div>
   );
 }
