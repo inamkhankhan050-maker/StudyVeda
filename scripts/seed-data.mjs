@@ -1,0 +1,231 @@
+// Single source of truth for StudyVeda's starter catalog and ORIGINAL sample questions.
+// `npm run seed` turns this into supabase/seed.sql (database) and src/data/seed.json (demo mode).
+
+export const categories = [
+  { slug: 'competitive-exams', name: 'Competitive Exams', description: 'Core sections tested in government and private recruitment exams.' },
+  { slug: 'computer-programming', name: 'Computer & Programming', description: 'Fundamentals, languages, data and cloud.' },
+  { slug: 'engineering-gate', name: 'Engineering & GATE', description: 'Branch-wise engineering subjects and GATE preparation.' },
+  { slug: 'graduation-postgraduate', name: 'Graduation & Postgraduate', description: 'University-level subjects for UG and PG students.' },
+  { slug: 'interview-preparation', name: 'Interview Preparation', description: 'HR, banking and technical interview practice.' },
+];
+
+// [slug, name, icon, [categories]]
+export const subjects = [
+  ['aptitude', 'Aptitude', 'Calculator', ['competitive-exams']],
+  ['english', 'English', 'Languages', ['competitive-exams']],
+  ['verbal-reasoning', 'Verbal Reasoning', 'MessageSquareText', ['competitive-exams']],
+  ['non-verbal-reasoning', 'Non-Verbal Reasoning', 'Shapes', ['competitive-exams']],
+  ['general-knowledge', 'General Knowledge', 'Lightbulb', ['competitive-exams']],
+  ['general-science', 'General Science', 'FlaskConical', ['competitive-exams']],
+  ['computer-fundamentals', 'Computer Fundamentals', 'Monitor', ['competitive-exams', 'computer-programming']],
+  ['data-interpretation', 'Data Interpretation', 'BarChart3', ['competitive-exams']],
+  ['banking-awareness', 'Banking Awareness', 'Landmark', ['competitive-exams']],
+  ['current-affairs', 'Current Affairs', 'Newspaper', ['competitive-exams']],
+  ['networking', 'Networking', 'Network', ['computer-programming']],
+  ['database', 'Database', 'Database', ['computer-programming']],
+  ['sql', 'SQL', 'Table', ['computer-programming']],
+  ['c-programming', 'C Programming', 'Code', ['computer-programming']],
+  ['cpp-programming', 'C++ Programming', 'Braces', ['computer-programming']],
+  ['java', 'Java', 'Coffee', ['computer-programming']],
+  ['python', 'Python', 'Terminal', ['computer-programming']],
+  ['javascript', 'JavaScript', 'FileCode', ['computer-programming']],
+  ['data-science', 'Data Science', 'ChartScatter', ['computer-programming']],
+  ['machine-learning', 'Machine Learning', 'BrainCircuit', ['computer-programming']],
+  ['cloud-computing', 'Cloud Computing', 'Cloud', ['computer-programming']],
+  ['computer-science', 'Computer Science', 'Cpu', ['engineering-gate']],
+  ['electronics-communication', 'Electronics & Communication', 'RadioTower', ['engineering-gate']],
+  ['mechanical-engineering', 'Mechanical Engineering', 'Cog', ['engineering-gate']],
+  ['civil-engineering', 'Civil Engineering', 'Building2', ['engineering-gate']],
+  ['electrical-engineering', 'Electrical Engineering', 'Zap', ['engineering-gate']],
+  ['chemical-engineering', 'Chemical Engineering', 'TestTube', ['engineering-gate']],
+  ['automobile-engineering', 'Automobile Engineering', 'Car', ['engineering-gate']],
+  ['biotechnology-engineering', 'Biotechnology Engineering', 'Dna', ['engineering-gate']],
+  ['mining-engineering', 'Mining Engineering', 'Pickaxe', ['engineering-gate']],
+  ['engineering-mathematics', 'Engineering Mathematics', 'Sigma', ['engineering-gate']],
+  ['engineering-physics', 'Engineering Physics', 'Atom', ['engineering-gate']],
+  ['engineering-chemistry', 'Engineering Chemistry', 'Beaker', ['engineering-gate']],
+  ['commerce', 'Commerce', 'Receipt', ['graduation-postgraduate']],
+  ['management', 'Management', 'Briefcase', ['graduation-postgraduate']],
+  ['law', 'Law', 'Scale', ['graduation-postgraduate']],
+  ['agriculture', 'Agriculture', 'Sprout', ['graduation-postgraduate']],
+  ['sociology', 'Sociology', 'Users', ['graduation-postgraduate']],
+  ['political-science', 'Political Science', 'Vote', ['graduation-postgraduate']],
+  ['psychology', 'Psychology', 'Brain', ['graduation-postgraduate']],
+  ['home-science', 'Home Science', 'House', ['graduation-postgraduate']],
+  ['pharmacy', 'Pharmacy', 'Pill', ['graduation-postgraduate']],
+  ['mass-communication-journalism', 'Mass Communication & Journalism', 'Mic', ['graduation-postgraduate']],
+  ['philosophy', 'Philosophy', 'BookOpen', ['graduation-postgraduate']],
+  ['hr-interview', 'HR Interview', 'Handshake', ['interview-preparation']],
+  ['banking-interview', 'Banking Interview', 'PiggyBank', ['interview-preparation']],
+  ['technical-interview', 'Technical Interview', 'Laptop', ['interview-preparation']],
+];
+
+// [slug, name, group]
+export const exams = [
+  ['ssc-exams', 'SSC Exams', 'SSC'],
+  ['ssc-cgl', 'SSC CGL', 'SSC'],
+  ['ssc-chsl', 'SSC CHSL', 'SSC'],
+  ['ssc-mts', 'SSC MTS', 'SSC'],
+  ['ssc-cpo', 'SSC CPO', 'SSC'],
+  ['ssc-je', 'SSC JE', 'SSC'],
+  ['ssc-gd', 'SSC GD', 'SSC'],
+  ['railway-exams', 'Railway Exams', 'Railway'],
+  ['rrb-ntpc', 'RRB NTPC', 'Railway'],
+  ['rrb-group-d', 'RRB Group D', 'Railway'],
+  ['rrb-alp', 'RRB ALP', 'Railway'],
+  ['rrb-technician', 'RRB Technician', 'Railway'],
+  ['rrb-section-controller', 'RRB Section Controller', 'Railway'],
+];
+
+// subject -> [[topicSlug, topicName], ...]
+export const topics = {
+  aptitude: [['percentage', 'Percentage'], ['profit-and-loss', 'Profit and Loss'], ['time-and-work', 'Time and Work'], ['simple-interest', 'Simple Interest'], ['averages', 'Averages'], ['speed-time-distance', 'Speed, Time and Distance']],
+  english: [['synonyms', 'Synonyms'], ['antonyms', 'Antonyms'], ['grammar', 'Grammar'], ['spelling', 'Spelling']],
+  'verbal-reasoning': [['series', 'Series'], ['coding-decoding', 'Coding-Decoding'], ['blood-relations', 'Blood Relations'], ['direction-sense', 'Direction Sense'], ['classification', 'Classification']],
+  'general-knowledge': [['indian-polity', 'Indian Polity'], ['geography', 'Geography'], ['history', 'History']],
+  'general-science': [['physics', 'Physics'], ['chemistry', 'Chemistry'], ['biology', 'Biology']],
+  'computer-fundamentals': [['basics', 'Computer Basics'], ['software', 'Software and Shortcuts']],
+  networking: [['network-basics', 'Network Basics'], ['protocols', 'Protocols']],
+  database: [['normalization', 'Normalization'], ['keys-and-transactions', 'Keys and Transactions']],
+  sql: [['queries', 'Queries'], ['joins', 'Joins']],
+  'c-programming': [['c-basics', 'C Basics']],
+  'cpp-programming': [['oop', 'Object-Oriented Programming']],
+  java: [['java-basics', 'Java Basics']],
+  python: [['python-basics', 'Python Basics'], ['operators', 'Operators'], ['data-types', 'Data Types']],
+  javascript: [['js-basics', 'JavaScript Basics']],
+  'data-science': [['statistics', 'Statistics'], ['pandas', 'Pandas']],
+  'machine-learning': [['ml-basics', 'ML Basics']],
+  'cloud-computing': [['service-models', 'Service Models']],
+  'computer-science': [['data-structures', 'Data Structures'], ['algorithms', 'Algorithms']],
+  'engineering-mathematics': [['calculus', 'Calculus'], ['linear-algebra', 'Linear Algebra']],
+  'engineering-physics': [['optics', 'Optics']],
+  'banking-awareness': [['rbi-and-monetary-policy', 'RBI and Monetary Policy'], ['payment-systems', 'Payment Systems']],
+  commerce: [['accounting', 'Accounting']],
+  management: [['principles-of-management', 'Principles of Management']],
+  law: [['constitutional-law', 'Constitutional Law']],
+  psychology: [['theories', 'Theories']],
+  'hr-interview': [['common-questions', 'Common Questions']],
+};
+
+// [subject, topic, exam|null, difficulty, question, A, B, C, D, correct, explanation, status?]
+export const questions = [
+  ['aptitude', 'percentage', 'ssc-cgl', 'easy', 'The price of a book rises from ₹200 to ₹250. What is the percentage increase?', '20%', '25%', '30%', '50%', 'B', 'Increase = 250 − 200 = ₹50. Percentage increase = 50 ÷ 200 × 100 = 25%.'],
+  ['aptitude', 'percentage', 'ssc-cgl', 'medium', 'A number is first increased by 10% and then decreased by 10%. What is the net change?', 'No change', '1% increase', '1% decrease', '2% decrease', 'C', 'Take 100. After +10% it is 110; after −10% it is 99. Net change = −1, i.e. a 1% decrease.'],
+  ['aptitude', 'percentage', 'ssc-chsl', 'easy', 'What is 15% of 480?', '62', '72', '82', '68', 'B', '15% of 480 = 0.15 × 480 = 72.'],
+  ['aptitude', 'profit-and-loss', 'ssc-chsl', 'easy', 'An article bought for ₹800 is sold for ₹920. What is the profit percentage?', '12%', '15%', '18%', '20%', 'B', 'Profit = ₹120. Profit % = 120 ÷ 800 × 100 = 15%.'],
+  ['aptitude', 'profit-and-loss', 'ssc-cgl', 'medium', 'A shopkeeper sells an item for ₹540 at a loss of 10%. What was the cost price?', '₹594', '₹600', '₹580', '₹610', 'B', 'Selling price = 90% of cost price, so cost price = 540 ÷ 0.9 = ₹600.'],
+  ['aptitude', 'time-and-work', 'rrb-ntpc', 'medium', 'A can finish a job in 12 days and B can finish it in 6 days. Working together, how many days will they take?', '3 days', '4 days', '6 days', '9 days', 'B', 'Combined work per day = 1/12 + 1/6 = 3/12 = 1/4, so together they need 4 days.'],
+  ['aptitude', 'time-and-work', 'rrb-ntpc', 'easy', 'If 8 workers build a wall in 15 days, how many days will 12 workers take at the same rate?', '8 days', '10 days', '12 days', '20 days', 'B', 'Total work = 8 × 15 = 120 worker-days. With 12 workers: 120 ÷ 12 = 10 days.'],
+  ['aptitude', 'simple-interest', 'ssc-chsl', 'easy', 'What is the simple interest on ₹5,000 at 8% per annum for 3 years?', '₹1,000', '₹1,200', '₹1,400', '₹1,500', 'B', 'SI = P × R × T ÷ 100 = 5000 × 8 × 3 ÷ 100 = ₹1,200.'],
+  ['aptitude', 'averages', 'ssc-cgl', 'medium', 'The average of 5 numbers is 24. If the number 40 is removed, what is the average of the remaining four numbers?', '18', '20', '21', '22', 'B', 'Sum of 5 numbers = 120. After removing 40 the sum is 80, and 80 ÷ 4 = 20.'],
+  ['aptitude', 'speed-time-distance', 'rrb-group-d', 'medium', 'A train covers 360 km in 4 hours. What is its speed in metres per second?', '20 m/s', '25 m/s', '30 m/s', '90 m/s', 'B', 'Speed = 360 ÷ 4 = 90 km/h. 90 × 5/18 = 25 m/s.'],
+
+  ['english', 'synonyms', 'ssc-cgl', 'easy', "Choose the word closest in meaning to 'Abundant'.", 'Scarce', 'Plentiful', 'Rare', 'Tiny', 'B', "'Abundant' means existing in large quantities, so 'Plentiful' is the synonym."],
+  ['english', 'synonyms', 'ssc-chsl', 'medium', "Choose the word closest in meaning to 'Candid'.", 'Frank', 'Secretive', 'Cruel', 'Hesitant', 'A', "'Candid' means truthful and straightforward, which is 'Frank'."],
+  ['english', 'antonyms', 'ssc-mts', 'easy', "Choose the word opposite in meaning to 'Ancient'.", 'Old', 'Modern', 'Historic', 'Antique', 'B', "'Ancient' means very old; its opposite is 'Modern'."],
+  ['english', 'antonyms', 'ssc-chsl', 'easy', "Choose the word opposite in meaning to 'Expand'.", 'Grow', 'Stretch', 'Contract', 'Widen', 'C', "To 'expand' is to become larger; to 'contract' is to become smaller."],
+  ['english', 'grammar', 'ssc-cgl', 'easy', 'Choose the grammatically correct sentence.', "She don't like tea.", "She doesn't likes tea.", "She doesn't like tea.", 'She not like tea.', 'C', "With a third-person singular subject we use 'does not' followed by the base verb: 'She doesn't like tea.'"],
+  ['english', 'grammar', 'ssc-cgl', 'medium', 'Fill in the blank: He has been living here ___ 2015.', 'for', 'since', 'from', 'by', 'B', "'Since' is used with a point in time (2015); 'for' is used with a duration."],
+  ['english', 'spelling', 'ssc-mts', 'medium', 'Choose the correctly spelt word.', 'Accomodate', 'Acommodate', 'Accommodate', 'Acomodate', 'C', "The correct spelling has double 'c' and double 'm': Accommodate."],
+
+  ['verbal-reasoning', 'series', 'rrb-ntpc', 'easy', 'Find the next number in the series: 2, 6, 12, 20, 30, ?', '40', '42', '44', '36', 'B', 'The differences are 4, 6, 8, 10, so the next difference is 12: 30 + 12 = 42.'],
+  ['verbal-reasoning', 'series', 'rrb-ntpc', 'medium', 'Find the next term in the series: A, C, F, J, ?', 'M', 'N', 'O', 'P', 'C', 'Letter positions are 1, 3, 6, 10 (gaps +2, +3, +4). The next gap is +5, giving 15 = O.'],
+  ['verbal-reasoning', 'coding-decoding', 'ssc-cgl', 'easy', 'If CAT is coded as DBU, how is DOG coded in the same way?', 'EPH', 'EPG', 'DPH', 'FPH', 'A', 'Each letter moves one place forward: D→E, O→P, G→H, so DOG becomes EPH.'],
+  ['verbal-reasoning', 'blood-relations', 'ssc-chsl', 'medium', "Pointing to a man, Riya says, 'He is the son of my mother's only brother.' How is the man related to Riya?", 'Brother', 'Cousin', 'Nephew', 'Uncle', 'B', "Riya's mother's only brother is Riya's maternal uncle; his son is Riya's cousin."],
+  ['verbal-reasoning', 'direction-sense', 'rrb-group-d', 'medium', 'Ravi walks 5 km north, turns right and walks 3 km, then turns right again and walks 5 km. How far is he from his starting point?', '3 km', '5 km', '8 km', '13 km', 'A', 'He goes north 5 km, east 3 km and then south 5 km, ending 3 km east of where he started.'],
+  ['verbal-reasoning', 'classification', 'ssc-mts', 'easy', 'Find the odd one out: Apple, Mango, Potato, Banana', 'Apple', 'Mango', 'Potato', 'Banana', 'C', 'Apple, Mango and Banana are fruits; Potato is a vegetable (a tuber).'],
+
+  ['general-knowledge', 'indian-polity', 'ssc-cgl', 'easy', 'Who is known as the chief architect of the Indian Constitution?', 'Jawaharlal Nehru', 'B. R. Ambedkar', 'Mahatma Gandhi', 'Sardar Vallabhbhai Patel', 'B', 'Dr B. R. Ambedkar chaired the Drafting Committee of the Constituent Assembly.'],
+  ['general-knowledge', 'indian-polity', 'rrb-ntpc', 'easy', 'On which date did the Constitution of India come into force?', '15 August 1947', '26 January 1950', '26 November 1949', '2 October 1950', 'B', 'The Constitution was adopted on 26 November 1949 and came into force on 26 January 1950, celebrated as Republic Day.'],
+  ['general-knowledge', 'geography', 'rrb-group-d', 'medium', "Which river is popularly called the 'Dakshin Ganga'?", 'Godavari', 'Krishna', 'Kaveri', 'Narmada', 'A', "The Godavari, the longest river of peninsular India, is often called the 'Dakshin Ganga'."],
+  ['general-knowledge', 'geography', 'ssc-gd', 'easy', 'Which is the largest state of India by area?', 'Madhya Pradesh', 'Maharashtra', 'Rajasthan', 'Uttar Pradesh', 'C', 'Rajasthan is the largest Indian state by area.'],
+  ['general-knowledge', 'history', 'rrb-group-d', 'easy', 'In which year was the Battle of Plassey fought?', '1757', '1764', '1857', '1526', 'A', 'The Battle of Plassey (1757) saw the East India Company defeat Siraj-ud-Daulah of Bengal.'],
+  ['general-knowledge', 'history', 'ssc-gd', 'easy', 'Who founded the Maurya Empire?', 'Ashoka', 'Bindusara', 'Chandragupta Maurya', 'Chanakya', 'C', 'Chandragupta Maurya founded the empire around 322 BCE, with Chanakya as his adviser.'],
+
+  ['general-science', 'physics', 'rrb-group-d', 'easy', 'What is the SI unit of force?', 'Joule', 'Newton', 'Watt', 'Pascal', 'B', 'Force is measured in newtons (N); 1 N = 1 kg·m/s².'],
+  ['general-science', 'chemistry', 'rrb-group-d', 'easy', 'What is the chemical formula of common salt?', 'NaCl', 'KCl', 'Na₂CO₃', 'NaOH', 'A', 'Common salt is sodium chloride, NaCl.'],
+  ['general-science', 'biology', 'ssc-gd', 'easy', 'Which cell organelle is known as the powerhouse of the cell?', 'Nucleus', 'Ribosome', 'Mitochondria', 'Golgi body', 'C', 'Mitochondria produce most of the cell’s ATP through cellular respiration.'],
+  ['general-science', 'biology', 'ssc-mts', 'easy', 'Which vitamin is produced by the human skin when exposed to sunlight?', 'Vitamin A', 'Vitamin B12', 'Vitamin C', 'Vitamin D', 'D', 'UV-B rays in sunlight help the skin synthesise vitamin D.'],
+
+  ['computer-fundamentals', 'basics', 'ssc-chsl', 'easy', 'What does CPU stand for?', 'Central Processing Unit', 'Central Program Unit', 'Computer Personal Unit', 'Control Processing Unit', 'A', 'CPU stands for Central Processing Unit, the component that executes instructions.'],
+  ['computer-fundamentals', 'basics', 'rrb-ntpc', 'easy', 'Which of the following is volatile memory?', 'ROM', 'RAM', 'Hard disk', 'Flash drive', 'B', 'RAM loses its contents when power is switched off, so it is volatile.'],
+  ['computer-fundamentals', 'basics', 'ssc-cgl', 'medium', 'In the binary convention, 1 kilobyte (KB) is equal to', '1000 bytes', '1024 bytes', '1024 bits', '512 bytes', 'B', 'In binary terms 1 KB = 2¹⁰ = 1024 bytes.'],
+  ['computer-fundamentals', 'software', 'ssc-mts', 'easy', 'Which of the following is an operating system?', 'Linux', 'MS Excel', 'Python', 'Photoshop', 'A', 'Linux is an operating system; the others are applications or a programming language.'],
+  ['computer-fundamentals', 'software', 'ssc-chsl', 'easy', 'Which keyboard shortcut copies selected content in Windows?', 'Ctrl + V', 'Ctrl + X', 'Ctrl + C', 'Ctrl + Z', 'C', 'Ctrl + C copies, Ctrl + X cuts, Ctrl + V pastes and Ctrl + Z undoes.'],
+
+  ['networking', 'network-basics', null, 'easy', 'How many layers does the OSI reference model have?', '4', '5', '7', '8', 'C', 'The OSI model has 7 layers: Physical, Data Link, Network, Transport, Session, Presentation and Application.'],
+  ['networking', 'protocols', null, 'medium', 'Which protocol automatically assigns IP addresses to devices on a network?', 'DNS', 'DHCP', 'FTP', 'SMTP', 'B', 'DHCP (Dynamic Host Configuration Protocol) leases IP addresses to clients.'],
+  ['networking', 'protocols', null, 'easy', 'What is the default port number for HTTPS?', '80', '21', '443', '25', 'C', 'HTTPS uses port 443; HTTP uses 80, FTP 21 and SMTP 25.'],
+  ['networking', 'network-basics', null, 'easy', 'How many bits are there in an IPv4 address?', '16', '32', '64', '128', 'B', 'An IPv4 address is 32 bits long; IPv6 addresses are 128 bits.'],
+
+  ['database', 'normalization', null, 'medium', 'Which normal form removes partial dependency of non-key attributes on a composite key?', '1NF', '2NF', '3NF', 'BCNF', 'B', 'Second Normal Form requires every non-key attribute to depend on the whole primary key.'],
+  ['database', 'keys-and-transactions', null, 'easy', 'Which statement about a primary key is true?', 'It can contain NULL values', 'It must be unique and not NULL', 'It may contain duplicate values', 'It must always be a text column', 'B', 'A primary key uniquely identifies each row, so it must be unique and cannot be NULL.'],
+  ['database', 'keys-and-transactions', null, 'easy', "In the ACID properties of transactions, what does 'A' stand for?", 'Accuracy', 'Atomicity', 'Availability', 'Authorization', 'B', 'Atomicity means a transaction completes fully or not at all.'],
+
+  ['sql', 'queries', null, 'medium', 'Which SQL clause filters groups after a GROUP BY?', 'WHERE', 'HAVING', 'ORDER BY', 'LIMIT', 'B', 'WHERE filters rows before grouping; HAVING filters the grouped results.'],
+  ['sql', 'queries', null, 'medium', 'Which command removes all rows from a table but keeps its structure, without allowing a WHERE condition?', 'DELETE', 'DROP', 'TRUNCATE', 'ALTER', 'C', 'TRUNCATE empties the table; DROP removes the table itself; DELETE can use WHERE.'],
+  ['sql', 'queries', null, 'easy', 'Which aggregate function returns the number of rows?', 'SUM()', 'COUNT()', 'MAX()', 'AVG()', 'B', 'COUNT() counts rows (or non-NULL values of a column).'],
+  ['sql', 'joins', null, 'easy', 'Which join returns all rows from the left table and the matching rows from the right table?', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'CROSS JOIN', 'B', 'A LEFT JOIN keeps every row of the left table and fills NULLs where there is no match.'],
+
+  ['c-programming', 'c-basics', null, 'easy', 'Which format specifier prints an int in C?', '%f', '%c', '%d', '%s', 'C', '%d prints a signed decimal integer; %f is for floating point, %c for char and %s for strings.'],
+  ['c-programming', 'c-basics', null, 'easy', 'What is sizeof(char) in C?', '1', '2', '4', '8', 'A', 'The C standard defines sizeof(char) as exactly 1.'],
+  ['c-programming', 'c-basics', null, 'medium', 'What does printf("%d", 7 / 2); print in C?', '3.5', '3', '4', '3.0', 'B', 'Both operands are integers, so integer division truncates 3.5 to 3.'],
+
+  ['cpp-programming', 'oop', null, 'easy', 'Which operator is the scope resolution operator in C++?', '::', '->', '.', '#', 'A', 'The :: operator accesses a name inside a namespace or class scope.'],
+  ['cpp-programming', 'oop', null, 'easy', 'Function overloading in C++ is an example of which OOP concept?', 'Encapsulation', 'Inheritance', 'Polymorphism', 'Abstraction', 'C', 'Overloading lets one function name take many forms — compile-time polymorphism.'],
+
+  ['java', 'java-basics', null, 'easy', 'Which keyword is used by a class to inherit another class in Java?', 'implements', 'extends', 'inherits', 'super', 'B', "A class uses 'extends' to inherit a class and 'implements' for interfaces."],
+  ['java', 'java-basics', null, 'easy', 'Java bytecode is executed by the', 'javac compiler', 'Java Virtual Machine (JVM)', 'JDK installer', 'operating system kernel directly', 'B', 'javac compiles source to bytecode, which the JVM then executes.'],
+  ['java', 'java-basics', null, 'medium', 'What is the default value of an int instance variable in Java?', '0', 'null', '1', 'Undefined', 'A', 'Numeric instance fields default to 0; object references default to null.'],
+
+  ['python', 'python-basics', null, 'easy', 'What is the output of print(type([])) in Python 3?', "<class 'list'>", "<class 'tuple'>", "<class 'dict'>", "<class 'array'>", 'A', '[] creates an empty list, so type([]) is list.'],
+  ['python', 'python-basics', null, 'easy', 'Which keyword is used to define a function in Python?', 'func', 'def', 'function', 'define', 'B', "Functions are defined with 'def', e.g. def greet():"],
+  ['python', 'python-basics', null, 'easy', "What does len('StudyVeda') return?", '8', '9', '10', '7', 'B', "'StudyVeda' has 9 characters: S-t-u-d-y-V-e-d-a."],
+  ['python', 'data-types', null, 'easy', 'Which of these Python data types is immutable?', 'list', 'dict', 'set', 'tuple', 'D', 'Tuples cannot be changed after creation; lists, dicts and sets are mutable.'],
+  ['python', 'operators', null, 'easy', 'What is the output of print(2 ** 3)?', '6', '8', '9', '5', 'B', '** is the exponent operator: 2³ = 8.'],
+  ['python', 'operators', null, 'medium', 'What is the output of print(10 // 3)?', '3.33', '3', '4', '1', 'B', '// is floor division, so 10 // 3 = 3. (10 % 3 would give 1.)'],
+
+  ['javascript', 'js-basics', null, 'medium', 'What does typeof null return in JavaScript?', "'null'", "'object'", "'undefined'", "'number'", 'B', "A long-standing quirk of JavaScript: typeof null is 'object'."],
+  ['javascript', 'js-basics', null, 'easy', 'Which keyword declares a block-scoped variable that cannot be reassigned?', 'var', 'let', 'const', 'static', 'C', "'const' is block-scoped and cannot be reassigned; 'let' can be reassigned."],
+  ['javascript', 'js-basics', null, 'medium', "What is the result of '5' + 3 in JavaScript?", '8', "'53'", 'NaN', 'A TypeError', 'B', 'With a string operand, + performs concatenation, producing the string "53".'],
+
+  ['data-science', 'statistics', null, 'easy', 'Which measure of central tendency is least affected by extreme outliers?', 'Mean', 'Median', 'Range', 'Standard deviation', 'B', 'The median depends on the middle value, so a few extreme values barely move it.'],
+  ['data-science', 'pandas', null, 'easy', 'Which pandas function reads a CSV file into a DataFrame?', 'pd.read_csv()', 'pd.load_csv()', 'pd.open_csv()', 'pd.csv()', 'A', 'pd.read_csv("file.csv") returns a DataFrame.'],
+
+  ['machine-learning', 'ml-basics', null, 'easy', 'Predicting house prices from features such as area and location is an example of', 'Classification', 'Regression', 'Clustering', 'Dimensionality reduction', 'B', 'The target (price) is a continuous number, so this is a regression task.'],
+  ['machine-learning', 'ml-basics', null, 'medium', 'A model is said to be overfitting when it', 'performs well on training data but poorly on new data', 'performs poorly on both training and new data', 'performs well on both training and new data', 'was trained with too few CPU cores', 'A', 'Overfitting means the model memorised the training data and fails to generalise.'],
+
+  ['cloud-computing', 'service-models', null, 'medium', 'In the IaaS model, which of the following is usually managed by the customer?', 'Physical servers', 'Data-centre power supply', 'Operating system', 'Network cabling', 'C', 'IaaS providers manage the hardware; customers manage the OS, runtime and applications.'],
+  ['cloud-computing', 'service-models', null, 'easy', 'What does SaaS stand for?', 'Software as a Service', 'Storage as a System', 'Server as a Service', 'Security as a Solution', 'A', 'SaaS delivers complete applications over the internet, e.g. web email.'],
+
+  ['computer-science', 'algorithms', null, 'easy', 'What is the worst-case time complexity of binary search on n sorted elements?', 'O(1)', 'O(log n)', 'O(n)', 'O(n log n)', 'B', 'Binary search halves the search space at every step, giving O(log n).'],
+  ['computer-science', 'data-structures', null, 'easy', 'Which data structure follows the LIFO principle?', 'Queue', 'Stack', 'Linked list', 'Heap', 'B', 'A stack is Last In, First Out; a queue is First In, First Out.'],
+
+  ['engineering-mathematics', 'calculus', null, 'easy', 'What is the derivative of sin x with respect to x?', 'cos x', '−cos x', '−sin x', 'tan x', 'A', 'd/dx (sin x) = cos x.'],
+  ['engineering-mathematics', 'linear-algebra', null, 'easy', 'What is the determinant of the matrix [[2, 3], [1, 4]]?', '5', '8', '11', '2', 'A', 'det = (2 × 4) − (3 × 1) = 8 − 3 = 5.'],
+
+  ['engineering-physics', 'optics', 'rrb-alp', 'easy', 'What is the approximate speed of light in vacuum?', '3 × 10⁸ m/s', '3 × 10⁶ m/s', '3 × 10⁵ m/s', '3 × 10¹⁰ m/s', 'A', 'Light travels at about 3 × 10⁸ m/s (299,792,458 m/s exactly) in vacuum.'],
+
+  ['banking-awareness', 'rbi-and-monetary-policy', null, 'medium', 'The repo rate is the rate at which', 'the RBI lends short-term funds to commercial banks', 'commercial banks lend to the public', 'the RBI borrows money from commercial banks', 'banks pay interest on savings accounts', 'A', 'Repo rate is the RBI’s lending rate to banks against government securities; reverse repo is the opposite flow.'],
+  ['banking-awareness', 'payment-systems', null, 'easy', 'What does NEFT stand for?', 'National Electronic Funds Transfer', 'Net Electronic Fund Transaction', 'National Easy Funds Transfer', 'New Electronic Finance Transfer', 'A', 'NEFT is the National Electronic Funds Transfer system operated by the RBI.'],
+
+  ['commerce', 'accounting', null, 'easy', 'Which of the following is the basic accounting equation?', 'Assets = Liabilities + Capital', 'Assets = Liabilities − Capital', 'Capital = Assets + Liabilities', 'Liabilities = Assets + Capital', 'A', 'Everything a business owns (assets) is financed by outsiders (liabilities) or owners (capital).'],
+  ['management', 'principles-of-management', null, 'easy', "Who is regarded as the 'Father of Scientific Management'?", 'F. W. Taylor', 'Henri Fayol', 'Peter Drucker', 'Elton Mayo', 'A', 'Frederick Winslow Taylor developed scientific management in the early 1900s.'],
+  ['law', 'constitutional-law', null, 'easy', 'Fundamental Rights are contained in which Part of the Constitution of India?', 'Part II', 'Part III', 'Part IV', 'Part V', 'B', 'Part III (Articles 12–35) contains the Fundamental Rights; Part IV contains the Directive Principles.'],
+  ['psychology', 'theories', null, 'easy', 'Who proposed the hierarchy of needs?', 'Abraham Maslow', 'Sigmund Freud', 'B. F. Skinner', 'Jean Piaget', 'A', 'Abraham Maslow proposed the hierarchy of needs in 1943.'],
+  ['hr-interview', 'common-questions', null, 'easy', "When asked 'What is your greatest weakness?', which answer approach is generally best?", 'Say you have no weaknesses', 'Name a genuine weakness and explain how you are improving it', 'Blame your previous employer', 'Name a weakness critical to the job and stop there', 'B', 'Interviewers look for self-awareness and a plan for improvement.'],
+
+  // Two drafts so the admin panel has something to publish. They never appear publicly.
+  ['aptitude', 'percentage', null, 'hard', 'A’s salary is 25% more than B’s. By what percentage is B’s salary less than A’s?', '20%', '25%', '15%', '22.5%', 'A', 'If B = 100, A = 125. B is less by 25 out of 125 = 20%.', 'draft'],
+  ['python', 'data-types', null, 'medium', 'What is the output of print(bool(""))?', 'True', 'False', 'None', 'Error', 'B', 'An empty string is falsy, so bool("") is False.', 'draft'],
+];
+
+// [slug, title, description, subject|null, exam|null, timeLimitMinutes|null, selector]
+export const practiceSets = [
+  ['python-basics', 'Python Basics', 'Core Python syntax, data types and operators.', 'python', null, null, (q) => q[0] === 'python'],
+  ['aptitude-quick-test', 'Aptitude Quick Test', 'Ten essential quantitative aptitude questions in ten minutes.', 'aptitude', null, 10, (q) => q[0] === 'aptitude'],
+  ['ssc-cgl-mini-mock', 'SSC CGL Mini Mock', 'A short mixed mock covering SSC CGL-style questions.', null, 'ssc-cgl', 12, (q) => q[2] === 'ssc-cgl'],
+  ['sql-essentials', 'SQL Essentials', 'Clauses, aggregates and joins.', 'sql', null, null, (q) => q[0] === 'sql'],
+  ['computer-fundamentals-basics', 'Computer Fundamentals Basics', 'Hardware, memory, software and shortcuts.', 'computer-fundamentals', null, null, (q) => q[0] === 'computer-fundamentals'],
+  ['railway-general-awareness', 'Railway General Awareness', 'GK and General Science for RRB exams.', null, 'rrb-group-d', 10, (q) => ['general-knowledge', 'general-science'].includes(q[0])],
+];
