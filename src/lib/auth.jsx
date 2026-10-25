@@ -28,10 +28,11 @@ export function AuthProvider({ children }) {
   const value = {
     user, ready, isAdmin, adminChecked, demo: IS_DEMO,
     signIn: async (e, p) => { const u = await backend.signIn(e, p); setUser(u); await refreshAdmin(u); return u; },
-    signUp: (e, p) => backend.signUp(e, p),
+    signUp: async (e, p, n) => { const r = await backend.signUp(e, p, n); if (r?.session && r.user) setUser(r.user); return r; },
     signOut: async () => { await backend.signOut(); setUser(null); setIsAdmin(IS_DEMO); },
     resetPassword: (e) => backend.resetPassword?.(e),
   };
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 export const useAuth = () => useContext(AuthCtx);
+export const displayName = (u) => (u?.user_metadata?.full_name || u?.email?.split('@')[0] || 'Student').slice(0, 40);
