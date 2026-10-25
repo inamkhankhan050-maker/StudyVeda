@@ -29,7 +29,7 @@ An original MCQ practice platform: a static React site for **GitHub Pages**, wit
 ## 2. Set up Supabase (free tier, about 10 minutes)
 
 1. Create an account at https://supabase.com → **New project**. Choose a region near your users (e.g. Mumbai), set a database password, wait for it to start.
-2. **Create the schema:** Dashboard → **SQL Editor** → **New query** → paste all of `supabase/migrations/001_schema.sql` → **Run**.
+2. **Create the schema:** Dashboard → **SQL Editor** → **New query** → paste all of `supabase/migrations/001_schema.sql` → **Run**. Then do the same with `supabase/migrations/002_comments.sql` (question discussion: only logged-in users can read/post).
 3. **Load the catalog + sample questions:** new query → paste `supabase/seed.sql` → **Run**. (Safe to re-run.)
 4. **Auth settings:** Dashboard → **Authentication** → **URL Configuration**
    * **Site URL:** `https://USERNAME.github.io/REPO-NAME/`
@@ -106,6 +106,7 @@ npm run dev                     # http://localhost:5173
 
 ```
 supabase/migrations/001_schema.sql   tables, constraints, triggers, views, RLS policies
+supabase/migrations/002_comments.sql per-question discussion (login-only read/post, own/admin delete)
 supabase/seed.sql                    catalog + sample questions (generated)
 supabase/create_first_admin.sql      grant admin to an existing user
 scripts/seed-data.mjs                source of the catalog + sample questions
