@@ -15,6 +15,7 @@ function load() {
   if (db) return db;
   try { db = JSON.parse(localStorage.getItem(KEY)); } catch { db = null; }
   if (!db || !db.subjects) db = { ...clone(seed), attempts: [], bookmarks: [] };
+  db.comments ||= [];
   return db;
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch { /* storage full */ } }
@@ -72,13 +73,25 @@ export const demo = {
     return delay(clone(d.questions.filter((q) => visibleQ(d, q)).sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, limit)));
   },
 
-  // ---------- auth: not available in demo ----------
-  async getUser() { return null; },
-  onAuthChange() { return () => {}; },
-  async signIn() { fail('Sign-in needs the Supabase backend. Add your Supabase URL and anon key, then rebuild.'); },
-  async signUp() { fail('Accounts need the Supabase backend. Add your Supabase URL and anon key, then rebuild.'); },
-  async signOut() {},
-  async resetPassword() { fail('Password reset needs the Supabase backend.'); },
+  // ---------- auth: demo accounts live ONLY in this browser (not secure, not shared) ----------
+  async getUser() { return currentUser(); },
+  onAuthChange(cb) { listeners.add(cb); return () => listeners.delete(cb); },
+  async signIn(email, password) {
+    const e = email.trim().toLowerCase(); const u = users().find((x) => x.email === e);
+    if (!u || u.hash !== await hashPw(e, password)) fail('Wrong email or password.');
+    localStorage.setItem(SESSION_KEY, u.id); const pub = toPublic(u); emit(pub); return pub;
+  },
+  async signUp(email, password, name) {
+    const e = email.trim().toLowerCase(); const list = users();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) fail('Enter a valid email address.');
+    if ((password || '').length < 8) fail('Password must be at least 8 characters.');
+    if (list.some((x) => x.email === e)) fail('An account with this email already exists on this device. Sign in instead.');
+    const u = { id: uid(), email: e, name: (name || '').trim().slice(0, 40) || e.split('@')[0], hash: await hashPw(e, password), created_at: now() };
+    list.push(u); localStorage.setItem(USERS_KEY, JSON.stringify(list)); localStorage.setItem(SESSION_KEY, u.id);
+    const pub = toPublic(u); emit(pub); return { user: pub, session: true };
+  },
+  async signOut() { localStorage.removeItem(SESSION_KEY); emit(null); },
+  async resetPassword() { fail('Password reset needs the database. In demo mode, create a new account instead.'); },
   async isAdmin() { return true; }, // demo admin edits only this browser's copy
 
   // ---------- student data (this device only) ----------
@@ -89,6 +102,24 @@ export const demo = {
   async toggleBookmark(question_id, on) {
     const d = load(); d.bookmarks = d.bookmarks.filter((b) => b.question_id !== question_id);
     if (on) d.bookmarks.push({ question_id, created_at: now() }); save(); return delay(on);
+  },
+
+  // ---------- discussion (signed-in users only, like the database rules) ----------
+  async listComments(question_id) {
+    if (!currentUser()) fail('Login to read the discussion.');
+    return delay(clone(load().comments.filter((c) => c.question_id === question_id).sort((a, b) => b.created_at.localeCompare(a.created_at))));
+  },
+  async addComment(question_id, body, author_name) {
+    const u = currentUser(); if (!u) fail('Login to post a comment.');
+    const text = (body || '').trim(); if (!text) fail('Write something first.'); if (text.length > 1000) fail('Comments can be at most 1000 characters.');
+    const d = load(); if (!d.questions.some((q) => q.id === question_id && visibleQ(d, q))) fail('This question is not available.');
+    const row = { id: uid(), question_id, user_id: u.id, author_name: (author_name || '').trim().slice(0, 40) || 'Student', body: text, created_at: now() };
+    d.comments.push(row); save(); return delay(clone(row));
+  },
+  async deleteComment(id) {
+    const u = currentUser(); const d = load(); const c = d.comments.find((x) => x.id === id);
+    if (!u || !c || c.user_id !== u.id) fail('You can delete only your own comments.');
+    d.comments = d.comments.filter((x) => x.id !== id); save(); return delay(true);
   },
 
   // ---------- admin ----------
@@ -134,6 +165,18 @@ export const demo = {
   },
   async adminGet(table, id) { const r = load()[table].find((x) => x.id === id); return delay(r ? clone(r) : null); },
 };
+
+// demo accounts
+const USERS_KEY = 'studyveda-demo-users-v1', SESSION_KEY = 'studyveda-demo-session-v1';
+const listeners = new Set();
+const emit = (u) => listeners.forEach((cb) => { try { cb(u); } catch { /* ignore */ } });
+function users() { try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch { return []; } }
+const toPublic = (u) => ({ id: u.id, email: u.email, user_metadata: { full_name: u.name } });
+function currentUser() { const id = localStorage.getItem(SESSION_KEY); const u = id && users().find((x) => x.id === id); return u ? toPublic(u) : null; }
+async function hashPw(email, pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('studyveda-demo:' + email + ':' + pw));
+  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 // mirrors the SQL constraints
 function checkRow(d, table, r, selfId) {
