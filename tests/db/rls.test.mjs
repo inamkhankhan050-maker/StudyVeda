@@ -27,6 +27,7 @@ await db.exec(`
     ('33333333-3333-3333-3333-333333333333','student2@example.com');
 `);
 await db.exec(readFileSync(new URL('../../supabase/migrations/001_schema.sql', import.meta.url), 'utf8'));
+await db.exec(readFileSync(new URL('../../supabase/migrations/002_comments.sql', import.meta.url), 'utf8'));
 await db.exec(readFileSync(new URL('../../supabase/seed.sql', import.meta.url), 'utf8'));
 await db.exec(readFileSync(new URL('../../supabase/create_first_admin.sql', import.meta.url), 'utf8').replace('YOUR_ADMIN_EMAIL@example.com', 'admin@example.com'));
 ok('schema, seed and first-admin script load without errors', true);
@@ -120,6 +121,41 @@ const r2 = await tryq("select count(*)::int n from questions where subject_id=(s
 ok('questions of an unpublished subject are hidden from the public', r.rows?.[0].n === 0 && r2.rows?.[0].n > 0);
 r = await tryq("select question_count::int n from subject_stats where subject_id=(select id from subjects where slug='python')");
 ok('public stats count only published questions', r.rows?.[0].n === 6);
+
+// ---------- discussion (comments) ----------
+const pubQ = (await db.query("select id from questions where status='published' limit 1")).rows[0].id;
+const draftQ = (await db.query("select id from questions where status='draft' limit 1")).rows[0]?.id || newId;
+await as('anon');
+r = await tryq(`insert into question_comments (question_id, author_name, body) values ($1,'Anon','hi')`, [pubQ]);
+ok('anon cannot post a comment', !!r.error);
+await as('authenticated', S1);
+r = await tryq(`insert into question_comments (question_id, author_name, body) values ($1,'Student One','Nice question') returning user_id`, [pubQ]);
+ok('signed-in student can post a comment (user_id is them)', r.rows?.[0].user_id === S1);
+const c1 = (await db.query('select id from question_comments limit 1')).rows[0]?.id;
+r = await tryq(`insert into question_comments (user_id, question_id, author_name, body) values ('${S2}',$1,'Fake','x')`, [pubQ]);
+ok('student cannot post as someone else', !!r.error);
+r = await tryq(`insert into question_comments (question_id, author_name, body) values ($1,'Student One','   ')`, [pubQ]);
+ok('empty comment is rejected', !!r.error);
+r = await tryq(`insert into question_comments (question_id, author_name, body) values ($1,'Student One','on a draft')`, [draftQ]);
+ok('student cannot comment on a hidden (draft) question', !!r.error);
+await as('anon');
+r = await tryq('select count(*)::int n from question_comments');
+ok('anon cannot read comments', !!r.error || r.rows?.[0].n === 0);
+await as('authenticated', S2);
+r = await tryq('select count(*)::int n from question_comments');
+ok('another signed-in student can read comments', r.rows?.[0].n === 1);
+r = await tryq('delete from question_comments returning id');
+ok("student cannot delete someone else's comment", !!r.error || r.rows.length === 0);
+r = await tryq(`update question_comments set body='edited' returning id`);
+ok('comments cannot be edited', !!r.error || r.rows.length === 0);
+await as('authenticated', S1);
+r = await tryq('delete from question_comments where id=$1 returning id', [c1]);
+ok('author can delete their own comment', r.rows?.length === 1);
+await as('authenticated', S2);
+await tryq(`insert into question_comments (question_id, author_name, body) values ($1,'Student Two','spam')`, [pubQ]);
+await as('authenticated', ADMIN);
+r = await tryq('delete from question_comments returning id');
+ok('admin can delete any comment', r.rows?.length === 1);
 
 await db.exec('reset role');
 console.log(`\n${pass} passed, ${fail} failed`);
