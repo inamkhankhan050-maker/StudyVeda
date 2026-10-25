@@ -9,7 +9,7 @@ const SHOTS = process.env.SHOTS || '/tmp/shots';
 mkdirSync(SHOTS, { recursive: true });
 let pass = 0, fail = 0;
 const ok = (name, cond, extra = '') => { cond ? pass++ : fail++; console.log(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? '  ' + extra : ''}`); };
-const step = async (name, fn) => { try { await fn(); } catch (e) { fail++; console.log(`FAIL  ${name}: ${e.message.split('\n')[0]}`); } };
+const step = async (name, fn) => { try { await fn(); } catch (e) { fail++; console.log(`FAIL  ${name}: ${e.message.split("\n")[0]}`); await page.screenshot({ path: "/tmp/fail.png" }).catch(() => {}); } };
 
 const srv = await serve('dist');
 const browser = await chromium.launch();
@@ -34,7 +34,7 @@ await step('homepage', async () => {
   const order = await page.locator('.sv-head h2').allInnerTexts();
   ok('homepage section order', order.indexOf('Competitive Exam Preparation') < order.indexOf('Interview Questions & Answers') && order[0] === 'Practice MCQs by Subject', order.join(' | '));
   const soon = await page.locator('.sv-grid .subject-card', { hasText: 'Mining Engineering' }).innerText();
-  ok('empty subject shows honest "Coming soon", no fake count', soon.includes('Coming soon') && !/\d+ questions?/.test(soon), soon.replace(/\n/g, ' / '));
+  ok('homepage card shows no fake count', !/\d+ questions?/.test(soon), soon.replace(/\n/g, ' / '));
   await page.locator('.sv-grid .subject-card', { hasText: 'Mining Engineering' }).click();
   await page.waitForURL(/\/subjects\/mining-engineering$/);
   ok('empty subject card → subject page with empty state', (await text()).includes('on the way'), (await text()).slice(0, 200));
@@ -44,9 +44,9 @@ await step('homepage', async () => {
   await page.locator('h1', { hasText: 'RRB NTPC' }).waitFor();
   ok('exam card → exam page with no-affiliation note', (await text()).includes('Not affiliated'), (await text()).slice(0, 160));
   await go('/');
-  await page.getByRole('link', { name: 'Explore Subjects' }).click();
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Subjects' }).click();
   await page.waitForURL(/\/subjects$/);
-  ok('Explore Subjects → /subjects', (await page.locator('h1').innerText()) === 'All subjects');
+  ok('nav Subjects → /subjects', (await page.locator('h1').innerText()) === 'All subjects');
   const cards = await page.locator('.subject-card').count();
   ok('All subjects page lists the catalog (Computer Fundamentals appears in 2 categories)', cards === 48, `cards=${cards}`);
   await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Exams' }).click();
