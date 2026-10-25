@@ -564,3 +564,18 @@ html[data-theme="dark"] .menu-btn { background: #111a2e; color: var(--ink); }
 .disc-body p { margin: .15rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 html[data-theme="dark"] .disc-join { background: #111a2e; }
 html[data-theme="dark"] .disc-ic { background: #1e293b; color: #93c5fd; }
+
+/* ---------- v5.1: tappable options on topic pages ---------- */
+.opt-tap { width: 100%; text-align: left; font: inherit; font-size: 1rem; color: var(--ink); background: #fff; cursor: pointer; min-height: 52px; transition: border-color .15s, background .15s; -webkit-tap-highlight-color: transparent; }
+.opt-tap:hover:not(:disabled) { border-color: var(--blue); background: var(--blue-50); }
+.opt-tap:disabled { cursor: default; opacity: 1; }
+.opt-tap .opt-text { flex: 1; }
+.opt-tap.correct { border-color: var(--ok); background: var(--ok-bg); }
+.opt-tap.correct .opt-letter { background: var(--ok); color: #fff; }
+.opt-tap.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.opt-tap.wrong .opt-letter { background: var(--bad); color: #fff; }
+.opt-mark.bad { color: var(--bad); }
+.pick-result { font-weight: 700; margin: 0 0 .4rem; }
+.pick-result.ok { color: var(--ok); } .pick-result.bad { color: var(--bad); }
+html[data-theme="dark"] .opt-tap { background: #111a2e; color: var(--ink); }
+html[data-theme="dark"] .opt-tap.correct { background: #052e22; } html[data-theme="dark"] .opt-tap.wrong { background: #3b0d0d; }
