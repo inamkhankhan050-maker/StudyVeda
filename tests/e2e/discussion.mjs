@@ -61,6 +61,23 @@ try {
   await f3.getByRole('button', { name: 'Delete my comment' }).click();
   await f3.getByText(/No comments yet/).waitFor();
   ok('own comment can be deleted', true);
+  // tappable options
+  await p.goto(TOPIC, { waitUntil: 'networkidle' });
+  const q1 = p.locator('.q-study').first();
+  await q1.getByRole('button', { name: /^Option A:/ }).click();
+  ok('tapping a wrong option marks it red and shows the right one green', await q1.locator('.opt-tap.wrong').count() === 1 && await q1.locator('.opt-tap.correct').count() === 1 && await q1.getByText(/Wrong. The correct answer is B/).isVisible());
+  ok('explanation appears after answering', await q1.locator('.explain').isVisible());
+  ok('options lock after one tap', await q1.getByRole('button', { name: /^Option C:/ }).isDisabled());
+  await q1.getByRole('button', { name: 'Try again' }).click();
+  await q1.getByRole('button', { name: /^Option B:/ }).click();
+  ok('tapping the right option says Correct', await q1.getByText('Correct! Well done.').isVisible() && !(await q1.locator('.opt-tap.wrong').count()));
+  // logo
+  await p.evaluate(() => window.scrollTo(0, 900)); await p.waitForTimeout(200);
+  await p.locator('header .logo').click(); await p.waitForTimeout(600);
+  ok('logo goes to the home page', /\/studyveda\/?$/.test(p.url()) && (await p.locator('main h1').first().innerText()).length > 0, p.url());
+  await p.evaluate(() => window.scrollTo(0, 1500)); await p.waitForTimeout(200);
+  await p.locator('header .logo').click(); await p.waitForTimeout(900);
+  ok('logo on the home page scrolls back to top', (await p.evaluate(() => window.scrollY)) < 5);
   const w = await p.evaluate(() => document.documentElement.scrollWidth);
   ok('no horizontal overflow at 360px', w <= 360, String(w));
   ok('no page errors', errors.length === 0, errors.join(' | '));
