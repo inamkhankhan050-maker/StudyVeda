@@ -3,7 +3,7 @@ import { Play, Timer, ArrowRight } from 'lucide-react';
 import { getCatalog, getExamPage } from '../lib/api.js';
 import { useAsync, useMeta } from '../lib/hooks.js';
 import Breadcrumbs from '../components/Breadcrumbs.jsx';
-import { SetCard, SubjectCard } from '../components/Cards.jsx';
+import { SetCard, SubjectCard, ExamCard } from '../components/Cards.jsx';
 import { Loading, ErrorState, Empty, NotFoundBlock } from '../components/States.jsx';
 import { plural } from '../lib/text.js';
 
@@ -20,15 +20,7 @@ export function Exams() {
       {groups.map((g) => (
         <section key={g} className="cat-block">
           <h2>{g === 'SSC' ? 'SSC Exams' : g === 'Railway' ? 'Railway Exams' : g}</h2>
-          <div className="grid-cards">
-            {c.exams.filter((e) => (e.group_name || 'Other') === g).map((e) => (
-              <Link key={e.id} to={`/exams/${e.slug}`} className="card exam-card">
-                <span className="subject-card-title">{e.name}</span>
-                <span className="muted small">{e.question_count ? plural(e.question_count, 'question') : 'Questions coming soon'}</span>
-                <ArrowRight className="arrow" size={18} aria-hidden="true" />
-              </Link>
-            ))}
-          </div>
+          <div className="sv-grid">{c.exams.filter((e) => (e.group_name || 'Other') === g).map((e) => <ExamCard key={e.id} e={e} />)}</div>
         </section>
       ))}
     </div>
@@ -46,7 +38,7 @@ export function Exam() {
   return (
     <div className="container section">
       <Breadcrumbs items={[{ to: '/exams', label: 'Exams' }, { label: e.name }]} />
-      <header className="page-head"><h1>{e.name}</h1><p className="muted">{e.description}</p><p className="meta-line">{plural(data.questions.length, 'question')}</p></header>
+      <header className="page-head"><h1>{e.name}</h1><p className="muted">{e.description}</p><p className="small muted">Independent practice in the style of this exam. Not affiliated with the conducting body.</p><p className="meta-line">{plural(data.questions.length, 'question')}</p></header>
       {data.questions.length > 0 ? (
         <div className="action-row">
           <Link className="btn btn-primary" to={`/play?type=exam&slug=${e.slug}&mode=practice`}><Play size={17} /> Practice</Link>
