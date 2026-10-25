@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Search, UserRound, ShieldCheck } from 'lucide-react';
+import { Menu, Search, UserRound } from 'lucide-react';
 import Logo from './Logo.jsx';
+import Drawer from './Drawer.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import { ToastContext } from '../lib/hooks.js';
 import { IS_DEMO } from '../lib/config.js';
@@ -26,7 +27,8 @@ function Header() {
   const [open, setOpen] = useState(false);
   const { user, isAdmin } = useAuth();
   const loc = useLocation();
-  useEffect(() => setOpen(false), [loc.pathname]);
+  const closeMenu = useCallback(() => setOpen(false), []);
+  useEffect(() => setOpen(false), [loc.pathname, loc.hash]);
   return (
     <header className="site-header">
       <div className="container header-row">
@@ -35,27 +37,16 @@ function Header() {
           {NAV.map(([to, label]) => <NavLink key={to} to={to}>{label}</NavLink>)}
         </nav>
         <div className="header-tools">
-          <div className="hide-sm"><SearchBox /></div>
-          {(isAdmin && !IS_DEMO) && <Link to="/admin" className="btn btn-ghost btn-sm hide-sm"><ShieldCheck size={16} /> Admin</Link>}
+          <div className="hide-sm header-search"><SearchBox /></div>
           {user
             ? <Link to="/progress" className="btn btn-ghost btn-sm hide-sm" title={user.email}><UserRound size={16} /> Account</Link>
-            : !IS_DEMO && <Link to="/login" className="btn btn-primary btn-sm hide-sm">Sign in</Link>}
-          <button className="menu-btn" aria-expanded={open} aria-controls="mobile-nav" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen(!open)}>
-            {open ? <X size={22} /> : <Menu size={22} />}
+            : <Link to="/login" className="btn btn-primary btn-sm hide-sm"><UserRound size={16} /> Login</Link>}
+          <button className="menu-btn" aria-expanded={open} aria-controls="mobile-nav" aria-label="Open menu" onClick={() => setOpen(true)}>
+            <Menu size={22} />
           </button>
         </div>
       </div>
-      {open && (
-        <div id="mobile-nav" className="mobile-nav">
-          <div className="container">
-            <SearchBox />
-            {NAV.map(([to, label]) => <NavLink key={to} to={to}>{label}</NavLink>)}
-            <NavLink to="/search">Search</NavLink>
-            {isAdmin && <NavLink to="/admin">Admin panel</NavLink>}
-            {!IS_DEMO && (user ? <NavLink to="/progress">Account ({user.email})</NavLink> : <NavLink to="/login">Sign in</NavLink>)}
-          </div>
-        </div>
-      )}
+      <Drawer open={open} onClose={closeMenu} />
     </header>
   );
 }
