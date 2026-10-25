@@ -1,25 +1,60 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Timer, RotateCcw } from 'lucide-react';
-import { getCatalog, getRecentQuestions } from '../lib/api.js';
+import { getCatalog } from '../lib/api.js';
 import { useAsync, useMeta } from '../lib/hooks.js';
 import { SearchBox } from '../components/Layout.jsx';
-import { SubjectCard, SetCard, QuestionPreview } from '../components/Cards.jsx';
+import { SubjectCard, ExamCard, SetCard } from '../components/Cards.jsx';
 import { Loading, ErrorState } from '../components/States.jsx';
 
-const POPULAR = ['aptitude', 'english', 'verbal-reasoning', 'general-knowledge', 'computer-fundamentals', 'python', 'sql', 'general-science'];
+// Homepage headings and copy per category (original StudyVeda wording).
+const SECTIONS = {
+  'competitive-exams': ['Practice MCQs by Subject', 'Core sections of government and private recruitment tests, each with answers and explanations.'],
+  'computer-programming': ['Computer & Programming MCQs', 'From computer basics to Python, SQL, data science and cloud.'],
+  'engineering-gate': ['Engineering & GATE MCQs', 'Branch-wise engineering subjects plus maths, physics and chemistry for GATE.'],
+  'graduation-postgraduate': ['Graduation & Postgraduate MCQs', 'University-level subjects for UG and PG students and entrance tests.'],
+  'interview-preparation': ['Interview Questions & Answers', 'Get ready for HR, banking and technical interview rounds.'],
+};
+
+function SectionHead({ id, title, sub, to, more }) {
+  return (
+    <div className="sv-head">
+      <div>
+        <h2 id={id}>{title}</h2>
+        {sub && <p>{sub}</p>}
+      </div>
+      {to && <Link to={to} className="link-more">{more} <ArrowRight size={16} /></Link>}
+    </div>
+  );
+}
 
 export default function Home() {
   useMeta(null, 'StudyVeda: practise MCQs for SSC, Railway and other competitive exams, programming, engineering and university subjects, with answers and explanations.');
   const { data: c, loading, error, reload } = useAsync(getCatalog, []);
-  const { data: recent } = useAsync(() => getRecentQuestions(5), []);
+  const cats = c ? c.categories.filter((cat) => cat.slug !== 'interview-preparation') : [];
+  const interview = c?.categories.find((cat) => cat.slug === 'interview-preparation');
+  const sets = c ? c.sets.filter((p) => p.question_count).slice(0, 6) : [];
+
+  const catSection = (cat) => {
+    const list = c.subjects.filter((s) => s.category_ids.includes(cat.id));
+    if (!list.length) return null;
+    const [title, sub] = SECTIONS[cat.slug] || [cat.name, cat.description];
+    return (
+      <section key={cat.id} className="section sv-section" aria-labelledby={`h-${cat.slug}`}>
+        <div className="container">
+          <SectionHead id={`h-${cat.slug}`} title={title} sub={sub} to={`/subjects#${cat.slug}`} more="Browse" />
+          <div className="sv-grid">{list.map((s) => <SubjectCard key={s.id} s={s} />)}</div>
+        </div>
+      </section>
+    );
+  };
 
   return (
     <>
       <section className="hero">
         <div className="container hero-inner">
-          <span className="pill">Free MCQ practice · Answers with explanations</span>
+          <span className="pill">Free MCQs with explanations</span>
           <h1>Practice MCQs for <span className="grad">Competitive Exams</span></h1>
-          <p className="lead">Aptitude, reasoning, English, GK, programming, engineering and more. Practise topic by topic, or take a timed test and review every answer.</p>
+          <p className="lead">Short, focused practice for SSC, Railway, programming, engineering and university subjects. Pick a topic, check each answer instantly, or take a timed test.</p>
           <SearchBox big />
           <div className="hero-cta">
             <Link to="/practice" className="btn btn-primary btn-lg">Start Practicing <ArrowRight size={18} /></Link>
@@ -37,47 +72,23 @@ export default function Home() {
       {error && <div className="container"><ErrorState error={error} onRetry={reload} /></div>}
       {c && (
         <>
-          <section className="section container">
-            <div className="section-head"><h2>Popular subjects</h2><Link to="/subjects" className="link-more">All subjects <ArrowRight size={16} /></Link></div>
-            <div className="grid-cards">
-              {POPULAR.map((slug) => c.subjects.find((s) => s.slug === slug)).filter(Boolean).map((s) => <SubjectCard key={s.id} s={s} />)}
+          {cats.map(catSection)}
+
+          <section className="section sv-section" aria-labelledby="h-exams">
+            <div className="container">
+              <SectionHead id="h-exams" title="Competitive Exam Preparation" sub="SSC and Railway practice organised by exam. StudyVeda is independent and not affiliated with any exam body." to="/exams" more="All exams" />
+              <div className="sv-grid">{c.exams.map((e) => <ExamCard key={e.id} e={e} />)}</div>
             </div>
           </section>
 
-          {c.sets.some((p) => p.question_count) && (
-            <section className="section section-tint">
+          {interview && catSection(interview)}
+
+          {sets.length > 0 && (
+            <section className="section sv-section sv-tint" aria-labelledby="h-sets">
               <div className="container">
-                <div className="section-head"><h2>Featured practice sets</h2><Link to="/practice" className="link-more">All sets <ArrowRight size={16} /></Link></div>
-                <div className="grid-sets">{c.sets.filter((p) => p.question_count).slice(0, 6).map((p) => <SetCard key={p.id} p={p} />)}</div>
+                <SectionHead id="h-sets" title="Featured Practice Sets" sub="Ready-made sets you can finish in a few minutes." to="/practice" more="All sets" />
+                <div className="grid-sets">{sets.map((p) => <SetCard key={p.id} p={p} />)}</div>
               </div>
-            </section>
-          )}
-
-          <section className="section container">
-            <div className="section-head"><h2>Competitive examinations</h2><Link to="/exams" className="link-more">All exams <ArrowRight size={16} /></Link></div>
-            <div className="chips">
-              {c.exams.map((e) => <Link key={e.id} to={`/exams/${e.slug}`} className="chip">{e.name}</Link>)}
-            </div>
-          </section>
-
-          {c.categories.map((cat) => {
-            const list = c.subjects.filter((s) => s.category_ids.includes(cat.id));
-            if (!list.length) return null;
-            return (
-              <section key={cat.id} className="section container cat-section">
-                <div className="section-head">
-                  <div><h2>{cat.name}</h2>{cat.description && <p className="muted small">{cat.description}</p>}</div>
-                  <Link to={`/subjects#${cat.slug}`} className="link-more">View all {list.length} <ArrowRight size={16} /></Link>
-                </div>
-                <div className="grid-compact">{list.slice(0, 8).map((s) => <SubjectCard key={s.id} s={s} compact />)}</div>
-              </section>
-            );
-          })}
-
-          {recent?.length > 0 && (
-            <section className="section container">
-              <div className="section-head"><h2>Recently added questions</h2></div>
-              <div className="recent-list">{recent.map((q) => <QuestionPreview key={q.id} q={q} />)}</div>
             </section>
           )}
         </>
