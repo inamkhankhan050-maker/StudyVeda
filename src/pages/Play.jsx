@@ -200,6 +200,9 @@ function Session({ data, source, initialMode }) {
 function Results({ data, round, mode, result, saveState, onRestart }) {
   const [filter, setFilter] = useState('all');
   const [bookmarks, setBookmarks] = useState(null);
+  // Ignore taps for a moment so a double-tap on "Submit" can't hit "Retake all" by accident
+  const [armed, setArmed] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setArmed(true), 600); return () => clearTimeout(t); }, []);
   const { user } = useAuth();
   const toast = useToast();
   const canBookmark = IS_DEMO || !!user;
@@ -236,8 +239,8 @@ function Results({ data, round, mode, result, saveState, onRestart }) {
           {saveState === 'error' && 'This result could not be saved.'}
         </p>
         <div className="action-row center">
-          {wrong.length > 0 && <button className="btn btn-primary" onClick={() => onRestart(wrong, true)}><RotateCcw size={17} /> Retry {plural(wrong.length, 'incorrect / skipped question')}</button>}
-          <button className="btn btn-outline" onClick={() => onRestart(data.questions, false)}>Retake all</button>
+          {wrong.length > 0 && <button className="btn btn-primary" disabled={!armed} onClick={() => onRestart(wrong, true)}><RotateCcw size={17} /> Retry {plural(wrong.length, 'incorrect / skipped question')}</button>}
+          <button className="btn btn-outline" disabled={!armed} onClick={() => onRestart(data.questions, false)}>Retake all</button>
           <Link className="btn btn-ghost" to={data.crumbs[data.crumbs.length - 1].to}>Done</Link>
         </div>
       </section>
