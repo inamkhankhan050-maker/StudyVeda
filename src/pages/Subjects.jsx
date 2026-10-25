@@ -37,7 +37,7 @@ export default function Subjects() {
         return (
           <section key={cat.id} id={cat.slug} className="cat-block">
             <h2>{cat.name} <span className="count">{list.length}</span></h2>
-            <div className="grid-cards">{list.map((s) => <SubjectCard key={s.id} s={s} />)}</div>
+            <div className="sv-grid">{list.map((s) => <SubjectCard key={s.id} s={s} />)}</div>
           </section>
         );
       })}
