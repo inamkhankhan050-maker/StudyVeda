@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Timer, RotateCcw } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { getCatalog } from '../lib/api.js';
 import { useAsync, useMeta } from '../lib/hooks.js';
 import { SearchBox } from '../components/Layout.jsx';
@@ -15,14 +15,11 @@ const SECTIONS = {
   'interview-preparation': ['Interview Questions & Answers', 'Get ready for HR, banking and technical interview rounds.'],
 };
 
-function SectionHead({ id, title, sub, to, more }) {
+function SectionHead({ id, title, sub }) {
   return (
     <div className="sv-head">
-      <div>
-        <h2 id={id}>{title}</h2>
-        {sub && <p>{sub}</p>}
-      </div>
-      {to && <Link to={to} className="link-more">{more} <ArrowRight size={16} /></Link>}
+      <h2 id={id} className="sv-banner">{title}</h2>
+      {sub && <p>{sub}</p>}
     </div>
   );
 }
@@ -41,8 +38,8 @@ export default function Home() {
     return (
       <section key={cat.id} className="section sv-section" aria-labelledby={`h-${cat.slug}`}>
         <div className="container">
-          <SectionHead id={`h-${cat.slug}`} title={title} sub={sub} to={`/subjects#${cat.slug}`} more="Browse" />
-          <div className="sv-grid">{list.map((s) => <SubjectCard key={s.id} s={s} />)}</div>
+          <SectionHead id={`h-${cat.slug}`} title={title} sub={sub} />
+          <div className="sv-grid">{list.map((s, i) => <SubjectCard key={s.id} s={s} tone={i} simple />)}</div>
         </div>
       </section>
     );
@@ -50,21 +47,15 @@ export default function Home() {
 
   return (
     <>
-      <section className="hero">
-        <div className="container hero-inner">
-          <span className="pill">Free MCQs with explanations</span>
+      <section className="sv-hero">
+        <div className="container">
           <h1>Practice MCQs for <span className="grad">Competitive Exams</span></h1>
-          <p className="lead">Short, focused practice for SSC, Railway, programming, engineering and university subjects. Pick a topic, check each answer instantly, or take a timed test.</p>
-          <SearchBox big />
-          <div className="hero-cta">
-            <Link to="/practice" className="btn btn-primary btn-lg">Start Practicing <ArrowRight size={18} /></Link>
-            <Link to="/subjects" className="btn btn-outline btn-lg">Explore Subjects</Link>
+          <p className="sv-hero-lead">Free practice questions with answers and explanations for SSC, Railway, computer, engineering and university subjects.</p>
+          <div className="sv-search-card">
+            <h2>Search MCQs, Topics &amp; Exams</h2>
+            <SearchBox big />
           </div>
-          <ul className="hero-points">
-            <li><CheckCircle2 size={16} /> Instant feedback</li>
-            <li><Timer size={16} /> Timed test mode</li>
-            <li><RotateCcw size={16} /> Retry wrong answers</li>
-          </ul>
+          <Link to="/practice" className="btn btn-primary btn-lg sv-start">Start Practicing <ArrowRight size={18} /></Link>
         </div>
       </section>
 
@@ -76,8 +67,8 @@ export default function Home() {
 
           <section className="section sv-section" aria-labelledby="h-exams">
             <div className="container">
-              <SectionHead id="h-exams" title="Competitive Exam Preparation" sub="SSC and Railway practice organised by exam. StudyVeda is independent and not affiliated with any exam body." to="/exams" more="All exams" />
-              <div className="sv-grid">{c.exams.map((e) => <ExamCard key={e.id} e={e} />)}</div>
+              <SectionHead id="h-exams" title="Competitive Exam Preparation" sub="SSC and Railway practice organised by exam. Independent, not affiliated with any exam body." />
+              <div className="sv-grid">{c.exams.map((e, i) => <ExamCard key={e.id} e={e} tone={i} simple />)}</div>
             </div>
           </section>
 
@@ -86,7 +77,7 @@ export default function Home() {
           {sets.length > 0 && (
             <section className="section sv-section sv-tint" aria-labelledby="h-sets">
               <div className="container">
-                <SectionHead id="h-sets" title="Featured Practice Sets" sub="Ready-made sets you can finish in a few minutes." to="/practice" more="All sets" />
+                <SectionHead id="h-sets" title="Featured Practice Sets" sub="Ready-made sets you can finish in a few minutes." />
                 <div className="grid-sets">{sets.map((p) => <SetCard key={p.id} p={p} />)}</div>
               </div>
             </section>
