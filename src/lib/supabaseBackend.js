@@ -95,8 +95,8 @@ export const supa = {
   async getUser() { const { data } = await sb().auth.getSession(); return data.session?.user || null; },
   onAuthChange(cb) { const { data } = sb().auth.onAuthStateChange((_e, session) => cb(session?.user || null)); return () => data.subscription.unsubscribe(); },
   async signIn(email, password) { const r = await sb().auth.signInWithPassword({ email, password }); if (r.error) throw new Error(r.error.message); return r.data.user; },
-  async signUp(email, password) {
-    const r = await sb().auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + import.meta.env.BASE_URL + 'login' } });
+  async signUp(email, password, name) {
+    const r = await sb().auth.signUp({ email, password, options: { data: { full_name: (name || '').trim().slice(0, 40) }, emailRedirectTo: window.location.origin + import.meta.env.BASE_URL + 'login' } });
     if (r.error) throw new Error(r.error.message); return r.data;
   },
   async signOut() { await sb().auth.signOut(); },
@@ -116,6 +116,19 @@ export const supa = {
     if (on) unwrap(await sb().from('bookmarks').upsert({ question_id }, { onConflict: 'user_id,question_id', ignoreDuplicates: true }));
     else unwrap(await sb().from('bookmarks').delete().eq('question_id', question_id));
     return on;
+  },
+
+  // ---------- discussion (RLS: signed-in users read/post; own or admin delete) ----------
+  async listComments(question_id) {
+    return unwrap(await sb().from('question_comments').select('id,question_id,user_id,author_name,body,created_at').eq('question_id', question_id).order('created_at', { ascending: false }).limit(200));
+  },
+  async addComment(question_id, body, author_name) {
+    return unwrap(await sb().from('question_comments').insert({ question_id, body: (body || '').trim(), author_name: (author_name || '').trim().slice(0, 40) || 'Student' }).select().single());
+  },
+  async deleteComment(id) {
+    const data = unwrap(await sb().from('question_comments').delete().eq('id', id).select('id'));
+    if (!data.length) throw new Error('You can delete only your own comments.');
+    return true;
   },
 
   // ---------- admin (RLS: admins only) ----------
