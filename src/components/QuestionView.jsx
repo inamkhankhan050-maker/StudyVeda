@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { OPTIONS, optKey, cap } from '../lib/text.js';
+import Discussion from './Discussion.jsx';
 
 // Read-only question with a "Show answer" toggle (used on topic pages and admin preview)
-export function QuestionStudy({ q, n, forceOpen }) {
+export function QuestionStudy({ q, n, forceOpen, discussion }) {
   const [open, setOpen] = useState(!!forceOpen);
   const show = forceOpen || open;
   return (
@@ -30,6 +31,7 @@ export function QuestionStudy({ q, n, forceOpen }) {
           {q.source && <p className="muted small">Source: {q.source}</p>}
         </div>
       )}
+      {discussion && <Discussion qid={q.id} />}
     </article>
   );
 }
