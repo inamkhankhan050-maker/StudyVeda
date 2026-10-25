@@ -36,7 +36,7 @@ export default function Topic() {
             <Link className="btn btn-primary" to={`/play?type=topic&subject=${s.slug}&slug=${t.slug}&mode=practice`}><Play size={17} /> Practice mode</Link>
             <Link className="btn btn-outline" to={`/play?type=topic&subject=${s.slug}&slug=${t.slug}&mode=test`}><Timer size={17} /> Test mode</Link>
           </div>
-          <div className="q-stack">{shown.map((q, i) => <QuestionStudy key={q.id} q={q} n={(page - 1) * PER_PAGE + i + 1} />)}</div>
+          <div className="q-stack">{shown.map((q, i) => <QuestionStudy key={q.id} q={q} n={(page - 1) * PER_PAGE + i + 1} discussion />)}</div>
           {pages > 1 && (
             <nav className="pager" aria-label="Question pages">
               <button className="btn btn-outline btn-sm" disabled={page === 1} onClick={() => { setPage(page - 1); window.scrollTo(0, 0); }}>Previous</button>
