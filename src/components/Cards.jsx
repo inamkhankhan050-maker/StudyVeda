@@ -1,6 +1,14 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Clock, ListChecks, TrainFront, ClipboardList } from 'lucide-react';
-import { SubjectIcon, tint } from './Icon.jsx';
+import { SUBJECT_ICONS, tint } from './Icon.jsx';
+import { BookOpen } from 'lucide-react';
+
+// Bright pastel tiles that rotate card by card (bg, icon colour)
+const PASTEL = [['#fde2e4', '#e11d48'], ['#d9f2e6', '#15803d'], ['#dbeafe', '#2563eb'], ['#fef3c7', '#d97706'], ['#ede9fe', '#7c3aed'], ['#cffafe', '#0891b2'], ['#ffedd5', '#ea580c'], ['#e0e7ff', '#4338ca']];
+function Tile({ Icon, tone, k }) {
+  const [bg, fg] = tone == null ? tint(k) : PASTEL[tone % PASTEL.length];
+  return <span className="icon-tile" style={{ background: bg, color: fg }} aria-hidden="true"><Icon size={22} strokeWidth={1.9} /></span>;
+}
 import { plural } from '../lib/text.js';
 
 function Count({ n }) {
@@ -10,32 +18,31 @@ function Count({ n }) {
 }
 
 // Full-width list card: icon tile, title, one-line subtitle, count, chevron. Whole card is the link.
-export function SubjectCard({ s, compact }) {
+export function SubjectCard({ s, compact, tone, simple }) {
   return (
-    <Link to={`/subjects/${s.slug}`} className={'card subject-card' + (compact ? ' compact' : '')}>
-      <SubjectIcon name={s.icon} k={s.slug} />
+    <Link to={`/subjects/${s.slug}`} className={'card subject-card' + (compact ? ' compact' : '') + (simple ? ' simple' : '')}>
+      <Tile Icon={SUBJECT_ICONS[s.icon] || BookOpen} tone={tone ?? (compact ? null : s.slug.length)} k={s.slug} />
       <span className="subject-card-body">
         <span className="subject-card-title">{s.name}</span>
         {!compact && s.description && <span className="subject-card-sub">{s.description}</span>}
-        <Count n={s.question_count} />
+        {!simple && <Count n={s.question_count} />}
       </span>
-      <span className="chev" aria-hidden="true"><ChevronRight size={18} /></span>
+      {simple ? <ArrowRight className="arrow" size={20} aria-hidden="true" /> : <span className="chev" aria-hidden="true"><ChevronRight size={18} /></span>}
     </Link>
   );
 }
 
-export function ExamCard({ e }) {
+export function ExamCard({ e, tone, simple }) {
   const Icon = e.group_name === 'Railway' ? TrainFront : ClipboardList;
-  const [bg, fg] = tint('exam-' + (e.group_name || e.slug));
   return (
-    <Link to={`/exams/${e.slug}`} className="card subject-card exam-row">
-      <span className="icon-tile" style={{ background: bg, color: fg }} aria-hidden="true"><Icon size={22} strokeWidth={1.9} /></span>
+    <Link to={`/exams/${e.slug}`} className={'card subject-card exam-row' + (simple ? ' simple' : '')}>
+      <Tile Icon={Icon} tone={tone ?? (e.group_name === 'Railway' ? 5 : 4)} k={e.slug} />
       <span className="subject-card-body">
         <span className="subject-card-title">{e.name} <span className="exam-tag">Exam</span></span>
         {e.description && <span className="subject-card-sub">{e.description}</span>}
-        <Count n={e.question_count} />
+        {!simple && <Count n={e.question_count} />}
       </span>
-      <span className="chev" aria-hidden="true"><ChevronRight size={18} /></span>
+      {simple ? <ArrowRight className="arrow" size={20} aria-hidden="true" /> : <span className="chev" aria-hidden="true"><ChevronRight size={18} /></span>}
     </Link>
   );
 }
