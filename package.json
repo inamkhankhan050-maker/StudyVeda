@@ -1,0 +1,35 @@
+{
+  "name": "studyveda",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build-seed.mjs && vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview",
+    "seed": "node scripts/build-seed.mjs",
+    "test": "vitest run",
+    "test:db": "node tests/db/rls.test.mjs",
+    "test:e2e": "node tests/e2e/e2e.mjs && node tests/e2e/supabase-mode.mjs",
+    "test:all": "npm test && npm run test:db && npm run build && npm run test:e2e",
+    "serve:dist": "node tests/e2e/serve.mjs dist"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "lucide-react": "^0.460.0",
+    "papaparse": "^5.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.49.1",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
