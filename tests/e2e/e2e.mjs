@@ -26,8 +26,24 @@ const text = () => page.locator('main, .admin-content').first().innerText();
 await step('homepage', async () => {
   await go('/');
   ok('homepage loads with hero heading', (await page.locator('h1').innerText()).includes('Practice MCQs for'));
-  for (const h of ['Popular subjects', 'Featured practice sets', 'Competitive examinations', 'Computer & Programming', 'Engineering & GATE', 'Graduation & Postgraduate', 'Interview Preparation', 'Recently added questions'])
-    ok(`homepage section: ${h}`, await page.getByRole('heading', { name: h }).count() > 0);
+  for (const h of ['Practice MCQs by Subject', 'Computer & Programming MCQs', 'Engineering & GATE MCQs', 'Graduation & Postgraduate MCQs', 'Competitive Exam Preparation', 'Interview Questions & Answers', 'Featured Practice Sets'])
+    ok(`homepage section: ${h}`, await page.getByRole('heading', { name: h, exact: true }).count() === 1);
+  const homeSubj = await page.locator('.sv-grid .subject-card:not(.exam-row)').count();
+  const homeExam = await page.locator('.sv-grid .exam-row').count();
+  ok('homepage shows every subject card (47 + Computer Fundamentals in 2 sections) and all 13 exams', homeSubj === 48 && homeExam === 13, `subjects=${homeSubj} exams=${homeExam}`);
+  const order = await page.locator('.sv-head h2').allInnerTexts();
+  ok('homepage section order', order.indexOf('Competitive Exam Preparation') < order.indexOf('Interview Questions & Answers') && order[0] === 'Practice MCQs by Subject', order.join(' | '));
+  const soon = await page.locator('.sv-grid .subject-card', { hasText: 'Mining Engineering' }).innerText();
+  ok('empty subject shows honest "Coming soon", no fake count', soon.includes('Coming soon') && !/\d+ questions?/.test(soon), soon.replace(/\n/g, ' / '));
+  await page.locator('.sv-grid .subject-card', { hasText: 'Mining Engineering' }).click();
+  await page.waitForURL(/\/subjects\/mining-engineering$/);
+  ok('empty subject card → subject page with empty state', (await text()).includes('on the way'), (await text()).slice(0, 200));
+  await go('/');
+  await page.locator('.exam-row', { hasText: 'RRB NTPC' }).click();
+  await page.waitForURL(/\/exams\/rrb-ntpc$/);
+  await page.locator('h1', { hasText: 'RRB NTPC' }).waitFor();
+  ok('exam card → exam page with no-affiliation note', (await text()).includes('Not affiliated'), (await text()).slice(0, 160));
+  await go('/');
   await page.getByRole('link', { name: 'Explore Subjects' }).click();
   await page.waitForURL(/\/subjects$/);
   ok('Explore Subjects → /subjects', (await page.locator('h1').innerText()) === 'All subjects');
