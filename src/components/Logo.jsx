@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export function LogoMark({ size = 36 }) {
   return (
@@ -13,8 +13,11 @@ export function LogoMark({ size = 36 }) {
 }
 
 export default function Logo({ to = '/', sub = true }) {
+  const { pathname } = useLocation();
+  // Already on that page: the router won't navigate, so jump back to the top instead of doing nothing.
+  const onClick = () => { if (pathname === to) window.scrollTo({ top: 0, behavior: 'smooth' }); };
   return (
-    <Link to={to} className="logo" aria-label="StudyVeda home">
+    <Link to={to} className="logo" aria-label="StudyVeda home" onClick={onClick}>
       <LogoMark />
       <span className="logo-text">
         <span className="logo-name">Study<span>Veda</span></span>
