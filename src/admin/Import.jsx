@@ -4,7 +4,7 @@ import { Download, Upload, CheckCircle2, XCircle, MinusCircle, FileText } from '
 import { admin } from '../lib/api.js';
 import { useAsync, useToast } from '../lib/hooks.js';
 import { parseQuestionCSV, buildImportRows, SAMPLE_CSV, CSV_COLUMNS, REQUIRED_COLUMNS, downloadText } from '../lib/csv.js';
-import { parseQuestionText, extractText, fileKind, DOC_SAMPLE, DOC_MAX_BYTES } from '../lib/docImport.js';
+import { parseQuestionText, extractText, sniffKind, DOC_SAMPLE, DOC_MAX_BYTES } from '../lib/docImport.js';
 import { AdminHead, Field } from './common.jsx';
 import { Loading, ErrorState } from '../components/States.jsx';
 
@@ -32,8 +32,9 @@ export default function ImportCSV() {
   const fail = (msg) => { setKind('csv'); setCsvParsed({ rows: [], fileErrors: [msg] }); };
   const onFile = async (f) => {
     setSummary(null); setCsvParsed(null); setDoc(null); setKind(null); setView('all'); setFile(f || null);
+    if (inputRef.current) inputRef.current.value = ''; // so picking the same file again still fires
     if (!f) return;
-    const k = fileKind(f);
+    const k = await sniffKind(f);
     if (k === 'doc') return fail('Old Word (.doc) files are not supported. In Word, use Save As → Word Document (.docx) and upload that.');
     if (!k) return fail('Please choose a CSV, Word (.docx) or PDF file.');
     if (k === 'csv') {
@@ -43,7 +44,10 @@ export default function ImportCSV() {
     if (f.size > DOC_MAX_BYTES) return fail('File is larger than 10 MB. Split it into smaller files.');
     setReading(true);
     try {
-      const text = await extractText(f);
+      const text = await Promise.race([
+        extractText(f, k),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('reading took too long')), 90000)),
+      ]);
       const fileErrors = [];
       if (!text.replace(/\s/g, '')) fileErrors.push(k === 'pdf' ? 'No text found in this PDF. It may be a scanned image; use a PDF made from Word or typed text.' : 'This Word file has no text.');
       const { records, warnings } = text.replace(/\s/g, '') ? parseQuestionText(text) : { records: [], warnings: [] };
@@ -118,7 +122,7 @@ export default function ImportCSV() {
         <label className="dropzone">
           <Upload size={22} aria-hidden="true" />
           <span>{reading ? 'Reading file…' : file ? file.name : 'Choose a CSV, Word or PDF file'}</span>
-          <input ref={inputRef} type="file" accept=".csv,text/csv,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,application/pdf" onChange={(e) => onFile(e.target.files[0])} disabled={reading} />
+          <input ref={inputRef} type="file" onChange={(e) => onFile(e.target.files[0])} disabled={reading} />
         </label>
         {isDoc && doc?.records.length > 0 && (
           <div className="doc-opts">
