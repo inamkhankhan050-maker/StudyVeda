@@ -579,3 +579,11 @@ html[data-theme="dark"] .disc-ic { background: #1e293b; color: #93c5fd; }
 .pick-result.ok { color: var(--ok); } .pick-result.bad { color: var(--bad); }
 html[data-theme="dark"] .opt-tap { background: #111a2e; color: var(--ink); }
 html[data-theme="dark"] .opt-tap.correct { background: #052e22; } html[data-theme="dark"] .opt-tap.wrong { background: #3b0d0d; }
+
+/* ---------- v5.2: Word / PDF import ---------- */
+.import-h3 { display: flex; align-items: center; gap: .4rem; font-size: 1rem; margin: 1rem 0 .4rem; color: var(--navy); }
+.import-h3:first-of-type { margin-top: .2rem; }
+.doc-sample { background: var(--bg-2, #f1f5f9); border: 1px solid var(--line); border-radius: 10px; padding: .75rem .9rem; font-size: .82rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; margin: .4rem 0 .6rem; }
+.doc-opts { margin-top: 1rem; padding: .9rem; border: 1px solid var(--line); border-radius: 12px; background: var(--blue-50); }
+html[data-theme="dark"] .doc-sample { background: #0b1222; color: var(--ink); }
+html[data-theme="dark"] .doc-opts { background: #111a2e; }
