@@ -1,6 +1,6 @@
 // Word (.docx) + PDF bulk import in the admin panel (demo mode). Fixtures: pandoc-made .docx and a Chromium-printed PDF.
 import { chromium } from 'playwright';
-import { existsSync, mkdirSync, copyFileSync } from 'node:fs';
+import { existsSync, mkdirSync, copyFileSync, readFileSync } from 'node:fs';
 import { serve } from './serve.mjs';
 let pass = 0, fail = 0;
 const ok = (n, c, x = '') => { c ? pass++ : fail++; console.log(`${c ? 'PASS' : 'FAIL'}  ${n}${x ? '  ' + x : ''}`); };
@@ -77,6 +77,12 @@ Correct Answer: 7</pre>`);
   await p.waitForSelector('.import-summary');
   ok('re-importing marks duplicates', (await p.locator('.import-summary').innerText()).includes('2 duplicates'));
 
+  // phone pickers sometimes give a file with no extension and a generic type
+  await p.locator('input[type=file]').setInputFiles({ name: 'document', mimeType: 'application/octet-stream', buffer: readFileSync(FX + '/q.pdf') });
+  ok('extension-less PDF is still read', await p.getByText('2 questions found.').waitFor({ timeout: 20000 }).then(() => true, () => false));
+  await p.locator('input[type=file]').setInputFiles({ name: 'msf:1234', mimeType: '', buffer: readFileSync(FX + '/typed.docx') });
+  ok('extension-less DOCX is still read', await p.getByText('3 questions found.').waitFor({ timeout: 20000 }).then(() => true, () => false));
+  ok('file input accepts any file (no greyed-out files in phone pickers)', (await p.locator('input[type=file]').getAttribute('accept')) === null);
   // bad files
   await p.locator('input[type=file]').setInputFiles({ name: 'old.doc', mimeType: 'application/msword', buffer: Buffer.from('x') });
   ok('.doc is rejected with a Save As hint', await p.getByText(/Save As → Word Document/).isVisible());
