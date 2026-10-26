@@ -155,7 +155,7 @@ export default function ImportCSV() {
                   {shown.map((r) => (
                     <tr key={r.rowNumber} className={'row-' + r.state}>
                       <td className="mono">{r.rowNumber}</td>
-                      <td className="q-cell"><span className="clamp-2">{r.data.question || <em className="muted">empty</em>}</span></td>
+                      <td className="q-cell"><span className="clamp-2">{r.data.question || <em className="muted">empty</em>}</span>{r.state !== 'valid' && <div className={'row-err small ' + (r.state === 'duplicate' ? 'warn-text' : 'err-text')}>{r.errors.join(' ')}</div>}</td>
                       <td className="small">{r.label.subject}{r.label.topic && <div className="muted">{r.label.topic}</div>}</td>
                       <td className="mono">{r.data.correct_option}</td>
                       <td className="small">{r.data.status}</td>
