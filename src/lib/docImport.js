@@ -140,6 +140,96 @@ export function parseQuestionText(text) {
   return { records, warnings };
 }
 
+// ---------- table layout ("Question | ... ", "Option | ... | Correct", "Solution | B") ----------
+// Many quiz tools export each question as a small table with a label column. We read those rows directly.
+
+const LABELS = { question: 'question', 'question text': 'question', type: 'type', option: 'option', options: 'option', solution: 'answer', answer: 'answer', 'correct answer': 'answer', marks: 'marks', explanation: 'explanation' };
+const labelOf = (s) => LABELS[String(s || '').trim().toLowerCase().replace(/[:\s]+$/, '')] || null;
+const STATUS = /^(correct|incorrect|right|wrong)$/i;
+
+/** cells: [{ label, text, status }] in reading order → { records, warnings } */
+export function recordsFromCells(cells) {
+  const qs = [];
+  let cur = null;
+  for (const c of cells) {
+    const kind = labelOf(c.label);
+    if (kind === 'question') { cur = { question: c.text.trim().replace(/\s+['"‘’`]$/, ''), options: [], correct: [], answer: '', explanation: '' }; qs.push(cur); continue; }
+    if (!cur) continue;
+    if (kind === 'option') { cur.options.push(c.text.trim()); if (/^(correct|right)$/i.test(c.status || '')) cur.correct.push(cur.options.length - 1); }
+    else if (kind === 'answer') cur.answer = c.text.trim();
+    else if (kind === 'explanation') cur.explanation = (cur.explanation + ' ' + c.text).trim();
+  }
+  const records = qs.map((q, i) => {
+    const r = { rowNumber: i + 1, question: q.question, explanation: q.explanation };
+    OPTIONS.forEach((L, k) => { r[optKey(L)] = q.options[k] || ''; });
+    let correct = '';
+    const m = q.answer.match(/^\(?([A-Da-d])\)?$/) || q.answer.match(/^option\s*\(?([A-Da-d])\)?$/i);
+    if (m) correct = m[1].toUpperCase();
+    else if (q.answer) correct = OPTIONS.find((L, k) => q.options[k] && normText(q.options[k]) === normText(q.answer)) || q.answer;
+    if (!correct && q.correct.length === 1) correct = OPTIONS[q.correct[0]] || '';
+    r.correct_option = correct;
+    return r;
+  });
+  return { records, warnings: records.length ? [] : ['No questions were found.'] };
+}
+export const looksLikeTable = (cells) => cells.filter((c) => labelOf(c.label) === 'question').length > 0 && cells.filter((c) => labelOf(c.label) === 'option').length >= 2;
+
+// Join the lines of one cell: numbered statements keep their own line.
+const joinCellLines = (lines) => lines.reduce((acc, l) => (!acc ? l : acc + (STATEMENT.test(l) || /^Which\b|^Select\b|^Choose\b/.test(l) || /[?:]$/.test(acc) ? '\n' : ' ') + l), '');
+
+/** pages: [[{ x, y, str }]] (PDF coordinates, y grows upwards) → cells in reading order, or [] if not a label table */
+export function pdfItemsToCells(pages) {
+  const all = pages.flatMap((items, p) => items.filter((i) => i.str.trim()).map((i) => ({ ...i, p, str: i.str.trim() })));
+  const labelItems = all.filter((i) => labelOf(i.str));
+  if (!labelItems.length) return [];
+  const minX = Math.min(...labelItems.map((i) => i.x));
+  const isLabel = (i) => labelOf(i.str) && i.x <= minX + 8;
+  const cells = [];
+  pages.forEach((_, p) => {
+    const labels = all.filter((i) => i.p === p && isLabel(i)).map((l) => ({ ...l, kind: labelOf(l.str), lines: [], status: '' }));
+    if (!labels.length) return;
+    const content = all.filter((i) => i.p === p && !isLabel(i) && i.x > minX + 20);
+    const shortFits = (kind, str) => (kind === 'type' ? /^[a-z_ -]+$/i.test(str) && str.length < 30 : kind === 'marks' ? /^[-\d.\s]+$/.test(str) : kind === 'answer' ? str.length < 60 : true);
+    const byDist = (y) => [...labels].sort((a, b) => Math.abs(a.y - y) - Math.abs(b.y - y));
+    // status column (Correct / Incorrect) goes to the option on the same line
+    content.filter((c) => STATUS.test(c.str)).forEach((c) => { const o = byDist(c.y).find((l) => l.kind === 'option'); if (o) o.status = c.str; });
+    // group the rest into visual lines, then into cells: lines closer than ~1.4 line-heights belong together
+    const rows = [];
+    content.filter((c) => !STATUS.test(c.str)).sort((a, b) => b.y - a.y).forEach((it) => {
+      const row = rows.find((r) => Math.abs(r.y - it.y) <= 2);
+      if (row) row.parts.push(it); else rows.push({ y: it.y, parts: [it] });
+    });
+    const groups = [];
+    rows.forEach((r) => { const g = groups[groups.length - 1]; if (g && g.minY - r.y <= 18) { g.rows.push(r); g.minY = r.y; } else groups.push({ maxY: r.y, minY: r.y, rows: [r] }); });
+    for (const g of groups) {
+      const text = g.rows.map((r) => r.parts.map((x) => x.str).join(' ')).join(' ');
+      const inside = labels.filter((l) => l.y >= g.minY - 6 && l.y <= g.maxY + 6);
+      const centre = (g.minY + g.maxY) / 2;
+      let target = inside.length ? inside.sort((a, b) => Math.abs(a.y - centre) - Math.abs(b.y - centre))[0] : null;
+      if (!target) {
+        const near = byDist(centre);
+        const gap = Math.min(...labels.map((l) => Math.max(0, l.y - g.maxY, g.minY - l.y)));
+        if (gap > 60 || /^question list$/i.test(text.trim())) continue; // page titles, headers
+        target = near[0];
+        if (['type', 'marks', 'answer'].includes(target.kind) && !shortFits(target.kind, text)) target = near.find((l) => ['question', 'option', 'explanation'].includes(l.kind)) || target;
+      }
+      g.rows.forEach((r) => target.lines.push(...r.parts));
+    }
+    labels.sort((a, b) => b.y - a.y);
+    for (const l of labels) {
+      // group pieces into visual lines (top to bottom, left to right)
+      const rows = [];
+      [...l.lines].sort((a, b) => b.y - a.y || a.x - b.x).forEach((it) => {
+        const row = rows.find((r) => Math.abs(r.y - it.y) <= 2);
+        if (row) row.parts.push(it); else rows.push({ y: it.y, parts: [it] });
+      });
+      const lines = rows.map((r) => r.parts.sort((a, b) => a.x - b.x).map((x) => x.str).join(' ').replace(/\s+/g, ' ').trim());
+      cells.push({ label: l.str, text: l.kind === 'question' ? joinCellLines(lines) : lines.join(' '), status: l.status });
+    }
+  });
+  return looksLikeTable(cells) ? cells : [];
+}
+
 // ---------- text extraction ----------
 
 async function docxToText(buf) {
@@ -147,6 +237,7 @@ async function docxToText(buf) {
   const { value: html } = await mammoth.convertToHtml({ arrayBuffer: buf });
   const doc = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html');
   const out = [];
+  const cells = [];
   const textOf = (el) => el.textContent.replace(/\s+/g, ' ').trim();
   const walk = (el, depth) => {
     for (const node of el.children) {
@@ -159,7 +250,17 @@ async function docxToText(buf) {
         out.push(LI + Math.max(0, depth - 1) + '|' + t);
         [...node.children].filter((c) => /^(ol|ul)$/i.test(c.tagName)).forEach((c) => walk(c, depth + 1));
       } else if (tag === 'table') {
-        node.querySelectorAll('tr').forEach((tr) => out.push([...tr.children].map(textOf).filter(Boolean).join(' ')));
+        node.querySelectorAll('tr').forEach((tr) => {
+          const tds = [...tr.children];
+          const lab = tds[0] ? textOf(tds[0]) : '';
+          if (labelOf(lab) && tds.length >= 2) {
+            const paras = [...tds[1].querySelectorAll('p, li')].map(textOf).filter(Boolean);
+            const text = paras.length ? joinCellLines(paras) : textOf(tds[1]);
+            const status = tds.slice(2).map(textOf).find((t) => STATUS.test(t)) || '';
+            cells.push({ label: lab, text, status });
+          }
+          out.push(tds.map(textOf).filter(Boolean).join(' '));
+        });
       } else {
         // <br> inside a paragraph = a line break the author typed with Shift+Enter
         const parts = node.innerHTML.split(/<br\s*\/?>/i).map((h) => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent.replace(/\s+/g, ' ').trim(); });
@@ -168,7 +269,7 @@ async function docxToText(buf) {
     }
   };
   walk(doc.body.firstChild, 0);
-  return out.join('\n');
+  return { text: out.join('\n'), cells: looksLikeTable(cells) ? cells : [] };
 }
 
 async function pdfToText(buf) {
@@ -177,9 +278,11 @@ async function pdfToText(buf) {
   pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
   const pdf = await pdfjs.getDocument({ data: new Uint8Array(buf), isEvalSupported: false }).promise;
   const lines = [];
+  const pages = [];
   for (let p = 1; p <= pdf.numPages; p++) {
     const page = await pdf.getPage(p);
     const { items } = await page.getTextContent();
+    pages.push(items.filter((it) => it.transform).map((it) => ({ x: it.transform[4], y: it.transform[5], str: it.str })));
     let line = '', lastY = null;
     for (const it of items) {
       const y = it.transform ? Math.round(it.transform[5]) : lastY;
@@ -190,7 +293,7 @@ async function pdfToText(buf) {
     }
     if (line.trim()) lines.push(line.trim());
   }
-  return lines.join('\n').replace(/ {2,}/g, ' ');
+  return { text: lines.join('\n').replace(/ {2,}/g, ' '), cells: pdfItemsToCells(pages) };
 }
 
 export const DOC_MAX_BYTES = 10 * 1024 * 1024;
@@ -211,6 +314,13 @@ export async function sniffKind(file) {
   if (head[0] === 0xd0 && head[1] === 0xcf) return 'doc';
   if (/^[\x09\x0a\x0d\x20-\x7e\xef\xbb\xbf]*$/.test(str) && /\.?(txt)?$/i.test(file.name) && /,/.test(await file.slice(0, 2000).text())) return 'csv';
   return null;
+}
+
+/** Read a .docx / .pdf and return { records, warnings, empty } */
+export async function extractQuestions(file, kind) {
+  const { text, cells } = await extractText(file, kind);
+  if (!text.replace(/\s/g, '')) return { records: [], warnings: [], empty: true };
+  return cells.length ? { ...recordsFromCells(cells), empty: false } : { ...parseQuestionText(text), empty: false };
 }
 
 export async function extractText(file, kind) {
