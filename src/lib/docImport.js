@@ -172,9 +172,23 @@ export const fileKind = (f) => (/\.csv$/i.test(f.name) || f.type === 'text/csv' 
   : /\.pdf$/i.test(f.name) || f.type === 'application/pdf' ? 'pdf'
   : /\.doc$/i.test(f.name) ? 'doc' : null);
 
-export async function extractText(file) {
+// Phones (Drive, WhatsApp, file managers) sometimes hand over files with no extension or a generic type.
+// Look at the first bytes when the name doesn't tell us.
+export async function sniffKind(file) {
+  const byName = fileKind(file);
+  if (byName) return byName;
+  const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+  const str = String.fromCharCode(...head);
+  if (str.startsWith('%PDF')) return 'pdf';
+  if (head[0] === 0x50 && head[1] === 0x4b) return 'docx'; // zip container
+  if (head[0] === 0xd0 && head[1] === 0xcf) return 'doc';
+  if (/^[\x09\x0a\x0d\x20-\x7e\xef\xbb\xbf]*$/.test(str) && /\.?(txt)?$/i.test(file.name) && /,/.test(await file.slice(0, 2000).text())) return 'csv';
+  return null;
+}
+
+export async function extractText(file, kind) {
   const buf = await file.arrayBuffer();
-  const kind = fileKind(file);
+  kind = kind || fileKind(file);
   if (kind === 'docx') return docxToText(buf);
   if (kind === 'pdf') return pdfToText(buf);
   throw new Error('Unsupported file type.');
