@@ -32,10 +32,18 @@ export function parseQuestionCSV(text, { subjects, topics, exams, existing = [] 
   parsed.errors.slice(0, 5).forEach((er) => fileErrors.push(`Row ${(er.row ?? 0) + 2}: ${er.message}`));
   if (missing.length) return { rows: [], fileErrors };
 
+  const rows = buildImportRows(parsed.data.map((r, i) => ({ ...r, rowNumber: i + 2 })), { subjects, topics, exams, existing }); // header is row 1
+  return { rows, fileErrors };
+}
+
+/**
+ * Validate already-parsed records (CSV-column keys + rowNumber) and mark duplicates. Shared by the CSV and Word/PDF importers.
+ */
+export function buildImportRows(records, { subjects, topics, exams, existing = [] }) {
   const existingKeys = new Set(existing.map((q) => q.subject_id + '|' + normText(q.question)));
   const fileKeys = new Map();
-  const rows = parsed.data.map((r, i) => {
-    const rowNumber = i + 2; // header is row 1
+  return records.map((r) => {
+    const rowNumber = r.rowNumber;
     const errors = [];
     const subject = findBy(subjects, r.subject);
     if (!subject) errors.push(r.subject ? `Unknown subject "${r.subject}".` : 'Subject is required.');
@@ -73,7 +81,6 @@ export function parseQuestionCSV(text, { subjects, topics, exams, existing = [] 
     }
     return { rowNumber, data, errors, state, label: { subject: subject?.name || r.subject, topic: topic?.name || r.topic || '' } };
   });
-  return { rows, fileErrors };
 }
 
 export function questionsToCSV(questions, { subjects, topics, exams }) {
