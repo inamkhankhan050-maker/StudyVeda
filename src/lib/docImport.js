@@ -17,6 +17,8 @@ C) object
 D) struct
 Answer: A`;
 
+const STATEMENT = /^(?:\(?\d{1,2}[.)]|\(?[ivx]{1,4}[.)]|[•\-–*])\s*/i;
+
 // A list item coming from Word's automatic numbering. depth 0 = top level.
 const LI = '\u0001LI';
 
@@ -66,13 +68,30 @@ export function parseQuestionText(text) {
   };
   const optCount = () => (cur ? Object.keys(cur.options).length : 0);
   const append = (txt) => {
-    if (field === 'question') cur.question = (cur.question + ' ' + txt).trim();
+    if (field === 'question') {
+      // after a list of statements, a new sentence goes on its own line
+      const lastLine = cur.question.split('\n').pop();
+      const nl = cur.question.includes('\n') && (/[.?!:]$/.test(lastLine) || STATEMENT.test(lastLine)) && /^[A-Z(]/.test(txt);
+      cur.question = (cur.question + (nl ? '\n' : ' ') + txt).trim();
+    }
     else if (field === 'option' && lastOpt) cur.options[lastOpt] = (cur.options[lastOpt] + ' ' + txt).trim();
     else if (field === 'explanation') cur.explanation = (cur.explanation + ' ' + txt).trim();
   };
   const setOption = (L, txt) => { cur.options[L] = txt; lastOpt = L; field = 'option'; };
 
-  for (let raw of lines) {
+  // Is there an option list ahead (before the next Answer line)? Used to tell a new numbered question
+  // from numbered points inside an explanation.
+  const optionsAhead = (i) => {
+    for (let j = i + 1; j < Math.min(lines.length, i + 25); j++) {
+      const t = lines[j].replace(/^\u0001LI\d+\|/, '');
+      if (RE.optStart.test(t)) return true;
+      if (RE.answer.test(t) || RE.explanation.test(t)) return false;
+    }
+    return false;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    let raw = lines[i];
     let li = null;
     if (raw.startsWith(LI)) { const m = raw.match(/^\u0001LI(\d+)\|(.*)$/); li = { depth: +m[1] }; raw = m[2].trim(); if (!raw) continue; }
     let m;
@@ -80,7 +99,14 @@ export function parseQuestionText(text) {
     if ((m = raw.match(RE.explanation)) && cur) { cur.explanation = m[1]; field = 'explanation'; continue; }
     if (cur && !cur.answer && optCount() >= 2 && (m = raw.match(RE.answer))) { cur.answer = parseAnswer(m[1] || m[2]); field = 'answer'; continue; }
     if ((m = raw.match(RE.qStart)) || (m = raw.match(RE.qLabelOnly))) {
-      // "1. ..." inside an explanation that hasn't reached a new question is still a new question: numbering wins.
+      const labelled = /^(Q|प्रश्न)/i.test(raw);
+      // Numbered statements inside a question ("Consider the following: 1. ... 2. ...") stay part of it
+      // while the question has no options yet.
+      if (cur && !labelled && optCount() === 0 && !cur.answer && field === 'question' && cur.question) {
+        cur.question += '\n' + raw; continue;
+      }
+      // Numbered points inside an explanation stay there unless a new option list follows.
+      if (cur && !labelled && field === 'explanation' && !(+m[1] === cur.num + 1 && optionsAhead(i))) { append(raw); continue; }
       start(+m[1], m[2]); continue;
     }
     if (cur && !cur.answer && (m = raw.match(RE.optStart))) {
@@ -95,6 +121,7 @@ export function parseQuestionText(text) {
       start(qs.length + 1, raw); continue;
     }
     if (!cur || (cur.answer && field !== 'explanation')) { start(qs.length + 1, raw); continue; }
+    if (field === 'question' && STATEMENT.test(raw)) { cur.question += '\n' + raw; continue; }
     append(raw);
   }
 
