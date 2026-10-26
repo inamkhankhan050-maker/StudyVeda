@@ -4,7 +4,7 @@ import { Download, Upload, CheckCircle2, XCircle, MinusCircle, FileText } from '
 import { admin } from '../lib/api.js';
 import { useAsync, useToast } from '../lib/hooks.js';
 import { parseQuestionCSV, buildImportRows, SAMPLE_CSV, CSV_COLUMNS, REQUIRED_COLUMNS, downloadText } from '../lib/csv.js';
-import { parseQuestionText, extractText, sniffKind, DOC_SAMPLE, DOC_MAX_BYTES } from '../lib/docImport.js';
+import { extractQuestions, sniffKind, DOC_SAMPLE, DOC_MAX_BYTES } from '../lib/docImport.js';
 import { AdminHead, Field } from './common.jsx';
 import { Loading, ErrorState } from '../components/States.jsx';
 
@@ -44,13 +44,12 @@ export default function ImportCSV() {
     if (f.size > DOC_MAX_BYTES) return fail('File is larger than 10 MB. Split it into smaller files.');
     setReading(true);
     try {
-      const text = await Promise.race([
-        extractText(f, k),
+      const { records, warnings, empty } = await Promise.race([
+        extractQuestions(f, k),
         new Promise((_, rej) => setTimeout(() => rej(new Error('reading took too long')), 90000)),
       ]);
       const fileErrors = [];
-      if (!text.replace(/\s/g, '')) fileErrors.push(k === 'pdf' ? 'No text found in this PDF. It may be a scanned image; use a PDF made from Word or typed text.' : 'This Word file has no text.');
-      const { records, warnings } = text.replace(/\s/g, '') ? parseQuestionText(text) : { records: [], warnings: [] };
+      if (empty) fileErrors.push(k === 'pdf' ? 'No text found in this PDF. It may be a scanned image; use a PDF made from Word or typed text.' : 'This Word file has no text.');
       setKind(k); setDoc({ records, fileErrors: [...fileErrors, ...warnings] });
     } catch (e) {
       fail(`Could not read this file (${e.message || 'unknown error'}). Make sure it is a valid, unlocked ${k === 'pdf' ? 'PDF' : 'Word .docx'} file.`);
@@ -105,6 +104,7 @@ export default function ImportCSV() {
         <pre className="doc-sample" aria-label="Word or PDF format example">{DOC_SAMPLE}</pre>
         <ul className="small muted bullets">
           <li>Also understood: <code>Q1.</code>, <code>(a)</code>, <code>A.</code>, options on one line, <code>Ans: (b)</code>, <code>Correct Answer: 25%</code>, <code>Solution:</code>, and Word&apos;s automatic numbering.</li>
+          <li>Table exports from quiz apps also work: rows labelled <code>Question</code>, <code>Option</code> (with Correct / Incorrect) and <code>Solution</code>.</li>
           <li>You choose the subject, topic, difficulty and status once for the whole file after uploading.</li>
           <li>Scanned or photo PDFs can&apos;t be read. Use a PDF saved from Word or typed text. Old <code>.doc</code> files must be saved as <code>.docx</code>.</li>
         </ul>
