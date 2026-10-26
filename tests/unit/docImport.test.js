@@ -66,3 +66,38 @@ Answer: A`;
     expect(warnings).toHaveLength(0);
   });
 });
+
+describe('statement-type questions', () => {
+  it('keeps numbered statements inside the question', () => {
+    const t = `1. Consider the following statements about the Forest Rights Act:
+1. It recognises rights of forest dwellers.
+2. It is applicable only to recorded forest areas.
+Which of the statements given above is/are correct?
+(a) 1 only
+(b) 2 only
+(c) Both 1 and 2
+(d) Neither 1 nor 2
+Answer: (a)
+Explanation: Points:
+1. Statement 1 is correct, statement 2 is wrong.
+2. With reference to rivers, consider:
+1. Ganga flows east.
+2. Narmada flows west.
+Which is correct?
+(a) 1 only (b) 2 only (c) Both 1 and 2 (d) Neither 1 nor 2
+Answer: c`;
+    const { records } = parseQuestionText(t);
+    expect(records).toHaveLength(2);
+    expect(records[0].question).toBe('Consider the following statements about the Forest Rights Act:\n1. It recognises rights of forest dwellers.\n2. It is applicable only to recorded forest areas.\nWhich of the statements given above is/are correct?');
+    expect(records[0]).toMatchObject({ option_c: 'Both 1 and 2', correct_option: 'A' });
+    expect(records[0].explanation).toContain('statement 2 is wrong.');
+    expect(records[1]).toMatchObject({ option_d: 'Neither 1 nor 2', correct_option: 'C' });
+    expect(records[1].question).toContain('\n2. Narmada flows west.');
+  });
+  it('Q-labelled questions with numbered statements', () => {
+    const t = `Q1. Consider:\n1. A\n2. B\nWhich?\nA) 1 only\nB) 2 only\nC) Both\nD) None\nAns: C\nQ2. Next one?\nA) w\nB) x\nC) y\nD) z\nAns: D`;
+    const { records } = parseQuestionText(t);
+    expect(records).toHaveLength(2);
+    expect(records[0].question).toBe('Consider:\n1. A\n2. B\nWhich?');
+  });
+});
