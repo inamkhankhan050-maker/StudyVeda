@@ -587,3 +587,4 @@ html[data-theme="dark"] .opt-tap.correct { background: #052e22; } html[data-them
 .doc-opts { margin-top: 1rem; padding: .9rem; border: 1px solid var(--line); border-radius: 12px; background: var(--blue-50); }
 html[data-theme="dark"] .doc-sample { background: #0b1222; color: var(--ink); }
 html[data-theme="dark"] .doc-opts { background: #111a2e; }
+.row-err { margin-top: .3rem; font-weight: 600; }
