@@ -12,7 +12,7 @@ const p = await ctx.newPage();
 const errors = []; p.on('pageerror', (e) => errors.push(e.message));
 const B = 'http://localhost:4173/studyveda';
 const FX = '/tmp/fx'; mkdirSync(FX, { recursive: true });
-['auto.docx', 'typed.docx'].forEach((f) => copyFileSync(new URL('../fixtures/' + f, import.meta.url), FX + '/' + f)); // made with: pandoc tests/fixtures/<name>.md -o <name>.docx
+['auto.docx', 'typed.docx', 'table.docx', 'manzil-table.pdf'].forEach((f) => copyFileSync(new URL('../fixtures/' + f, import.meta.url), FX + '/' + f)); // made with: pandoc tests/fixtures/<name>.md -o <name>.docx
 try {
   // make a text PDF
   const mk = await ctx.newPage();
@@ -77,6 +77,19 @@ Correct Answer: 7</pre>`);
   await p.waitForSelector('.import-summary');
   ok('re-importing marks duplicates', (await p.locator('.import-summary').innerText()).includes('2 duplicates'));
 
+  // table-layout exports (Question / Option / Solution rows)
+  await p.locator('input[type=file]').setInputFiles(FX + '/manzil-table.pdf');
+  await p.getByText('20 questions found.').waitFor({ timeout: 20000 });
+  await p.locator('.doc-opts select').first().selectOption({ label: 'General Knowledge' });
+  await p.waitForSelector('.import-summary');
+  s = await p.locator('.import-summary').innerText();
+  ok('table-layout PDF: 20 ready', s.includes('20 ready') && s.includes('0 with errors'), s.replace(/\n/g, ' '));
+  await p.locator('input[type=file]').setInputFiles(FX + '/table.docx');
+  await p.getByText('2 questions found.').waitFor({ timeout: 20000 });
+  await p.locator('.doc-opts select').first().selectOption({ label: 'General Knowledge' });
+  await p.waitForSelector('.import-summary');
+  s = await p.locator('.import-summary').innerText();
+  ok('table-layout DOCX: 2 ready', s.includes('2 ready') && s.includes('0 with errors'), s.replace(/\n/g, ' '));
   // phone pickers sometimes give a file with no extension and a generic type
   await p.locator('input[type=file]').setInputFiles({ name: 'document', mimeType: 'application/octet-stream', buffer: readFileSync(FX + '/q.pdf') });
   ok('extension-less PDF is still read', await p.getByText('2 questions found.').waitFor({ timeout: 20000 }).then(() => true, () => false));
