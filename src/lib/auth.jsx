@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
   const value = {
     user, ready, isAdmin, adminChecked, demo: IS_DEMO,
     signIn: async (e, p) => { const u = await backend.signIn(e, p); setUser(u); await refreshAdmin(u); return u; },
-    signUp: async (e, p, n) => { const r = await backend.signUp(e, p, n); if (r?.session && r.user) setUser(r.user); return r; },
+    signUp: async (e, p, n, m) => { const r = await backend.signUp(e, p, n, m); if (r?.session && r.user) setUser(r.user); return r; },
     signOut: async () => { await backend.signOut(); setUser(null); setIsAdmin(IS_DEMO); },
     resetPassword: (e) => backend.resetPassword?.(e),
   };
