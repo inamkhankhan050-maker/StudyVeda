@@ -133,7 +133,7 @@ export const supa = {
 
   // ---------- admin (RLS: admins only) ----------
   async adminSelect(table) {
-    const order = { questions: 'updated_at', categories: 'sort_order', subjects: 'sort_order', topics: 'sort_order', exams: 'sort_order', practice_sets: 'updated_at' }[table];
+    const order = { questions: 'updated_at', categories: 'sort_order', subjects: 'sort_order', topics: 'sort_order', exams: 'sort_order', practice_sets: 'updated_at', student_profiles: 'created_at' }[table];
     return fetchAll(() => { const q = sb().from(table).select(table === 'questions' ? QCOLS : '*'); return order ? q.order(order) : q; });
   },
   async adminInsert(table, row) { return unwrap(await sb().from(table).insert(row).select().single()); },
