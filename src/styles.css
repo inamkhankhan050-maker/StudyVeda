@@ -594,3 +594,18 @@ html[data-theme="dark"] .doc-opts { background: #111a2e; }
 .phone-input .phone-cc { display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--line-2); border-right: 0; border-radius: var(--radius-sm) 0 0 var(--radius-sm); background: var(--bg-soft); font-weight: 600; color: inherit; }
 .phone-input .input { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; flex: 1; min-width: 0; }
 .err-text { color: var(--bad); }
+.students-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin: 0 0 1rem; }
+.search-inline { position: relative; flex: 1; min-width: 220px; max-width: 420px; display: block; }
+.search-inline svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.search-inline .input { padding-left: 38px; }
+.students-table td.mono { white-space: nowrap; }
+@media (max-width: 640px) {
+  .students-table thead { display: none; }
+  .students-table, .students-table tbody, .students-table tr, .students-table td { display: block; width: 100%; }
+  .students-table tr { position: relative; padding: .8rem 1rem; border-bottom: 1px solid var(--line); }
+  .students-table td { padding: .1rem 0; border: 0; }
+  .students-table td.row-actions { position: absolute; top: .7rem; right: .8rem; width: auto; display: flex; gap: .4rem; }
+  .students-table td[data-label="Name"] { padding-right: 96px; font-size: 1.02rem; }
+  .students-table td[data-label="Mobile"] { font-size: 1rem; }
+  .search-inline { max-width: none; }
+}
