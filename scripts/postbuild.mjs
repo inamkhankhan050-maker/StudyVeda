@@ -38,7 +38,7 @@ const routes = [
   ...seed.practice_sets.filter(pub).map((p) => [`/practice/${p.slug}`, p.title, p.description || p.title]),
 ];
 // no-index app routes still need a file so refresh works
-const appRoutes = ['/search', '/login', '/progress', '/play', '/admin', '/admin/subjects', '/admin/topics', '/admin/questions', '/admin/questions/new', '/admin/import', '/admin/sets', '/admin/sets/new', '/admin/exams', '/admin/students'];
+const appRoutes = ['/search', '/login', '/progress', '/play', '/admin', '/admin/subjects', '/admin/topics', '/admin/questions', '/admin/questions/new', '/admin/import', '/admin/sets', '/admin/sets/new', '/admin/exams'];
 
 function page(path, title, desc, noindex) {
   let html = template;
