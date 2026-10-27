@@ -588,3 +588,9 @@ html[data-theme="dark"] .opt-tap.correct { background: #052e22; } html[data-them
 html[data-theme="dark"] .doc-sample { background: #0b1222; color: var(--ink); }
 html[data-theme="dark"] .doc-opts { background: #111a2e; }
 .row-err { margin-top: .3rem; font-weight: 600; }
+
+/* v5.3 mobile number at signup */
+.phone-input { display: flex; align-items: stretch; gap: 0; }
+.phone-input .phone-cc { display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--line-2); border-right: 0; border-radius: var(--radius-sm) 0 0 var(--radius-sm); background: var(--bg-soft); font-weight: 600; color: inherit; }
+.phone-input .input { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; flex: 1; min-width: 0; }
+.err-text { color: var(--bad); }
