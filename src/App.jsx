@@ -25,6 +25,7 @@ const QuestionsAdmin = lazy(() => import('./admin/Questions.jsx').then((m) => ({
 const QuestionForm = lazy(() => import('./admin/Questions.jsx').then((m) => ({ default: m.QuestionForm })));
 const ImportCSV = lazy(() => import('./admin/Import.jsx'));
 const SetsAdmin = lazy(() => import('./admin/Sets.jsx').then((m) => ({ default: m.SetsAdmin })));
+const StudentsAdmin = lazy(() => import('./admin/Students.jsx'));
 const SetForm = lazy(() => import('./admin/Sets.jsx').then((m) => ({ default: m.SetForm })));
 
 export default function App() {
@@ -62,6 +63,7 @@ export default function App() {
               <Route path="sets" element={<SetsAdmin />} />
               <Route path="sets/new" element={<SetForm />} />
               <Route path="sets/:id" element={<SetForm />} />
+              <Route path="students" element={<StudentsAdmin />} />
             </Route>
           </Routes>
         </Suspense>
