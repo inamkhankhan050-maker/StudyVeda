@@ -81,12 +81,13 @@ export const demo = {
     if (!u || u.hash !== await hashPw(e, password)) fail('Wrong email or password.');
     localStorage.setItem(SESSION_KEY, u.id); const pub = toPublic(u); emit(pub); return pub;
   },
-  async signUp(email, password, name) {
+  async signUp(email, password, name, phone) {
     const e = email.trim().toLowerCase(); const list = users();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) fail('Enter a valid email address.');
     if ((password || '').length < 8) fail('Password must be at least 8 characters.');
+    if (!phone) fail('Enter a valid 10-digit mobile number.');
     if (list.some((x) => x.email === e)) fail('An account with this email already exists on this device. Sign in instead.');
-    const u = { id: uid(), email: e, name: (name || '').trim().slice(0, 40) || e.split('@')[0], hash: await hashPw(e, password), created_at: now() };
+    const u = { id: uid(), email: e, name: (name || '').trim().slice(0, 40) || e.split('@')[0], phone, hash: await hashPw(e, password), created_at: now() };
     list.push(u); localStorage.setItem(USERS_KEY, JSON.stringify(list)); localStorage.setItem(SESSION_KEY, u.id);
     const pub = toPublic(u); emit(pub); return { user: pub, session: true };
   },
