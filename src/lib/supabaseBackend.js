@@ -95,8 +95,8 @@ export const supa = {
   async getUser() { const { data } = await sb().auth.getSession(); return data.session?.user || null; },
   onAuthChange(cb) { const { data } = sb().auth.onAuthStateChange((_e, session) => cb(session?.user || null)); return () => data.subscription.unsubscribe(); },
   async signIn(email, password) { const r = await sb().auth.signInWithPassword({ email, password }); if (r.error) throw new Error(r.error.message); return r.data.user; },
-  async signUp(email, password, name) {
-    const r = await sb().auth.signUp({ email, password, options: { data: { full_name: (name || '').trim().slice(0, 40) }, emailRedirectTo: window.location.origin + import.meta.env.BASE_URL + 'login' } });
+  async signUp(email, password, name, phone) {
+    const r = await sb().auth.signUp({ email, password, options: { data: { full_name: (name || '').trim().slice(0, 40), phone }, emailRedirectTo: window.location.origin + import.meta.env.BASE_URL + 'login' } });
     if (r.error) throw new Error(r.error.message); return r.data;
   },
   async signOut() { await sb().auth.signOut(); },
