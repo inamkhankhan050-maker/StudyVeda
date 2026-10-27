@@ -124,7 +124,10 @@ export const demo = {
   },
 
   // ---------- admin ----------
-  async adminSelect(table) { return delay(clone(load()[table] || [])); },
+  async adminSelect(table) {
+    if (table === 'student_profiles') return delay(users().filter((u) => u.phone).map((u) => ({ user_id: u.id, full_name: u.name, email: u.email, phone: u.phone, created_at: u.created_at })));
+    return delay(clone(load()[table] || []));
+  },
 
   async adminInsert(table, row) {
     const d = load(); checkRow(d, table, row);
