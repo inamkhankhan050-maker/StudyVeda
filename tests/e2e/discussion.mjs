@@ -21,6 +21,7 @@ try {
   await p.waitForURL(/\/login$/);
   await p.getByRole('button', { name: 'Create an account' }).click();
   await p.getByLabel('Your name').fill('Inam Test');
+  await p.getByLabel('Mobile number').fill('9876543210');
   await p.getByLabel('Email').fill('inam@example.com');
   await p.getByLabel('Password').fill('password123');
   await p.getByRole('button', { name: 'Create account' }).click();
